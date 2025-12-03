@@ -1,0 +1,78 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+
+class MovablePhoto extends StatefulWidget {
+  final File image;
+  final BuildContext context;
+
+  const MovablePhoto({super.key, required this.image, required this.context});
+
+  @override
+  State<MovablePhoto> createState() => _MovablePhotoState();
+}
+
+class _MovablePhotoState extends State<MovablePhoto> {
+  double x = 0;
+  double y = 0;
+  double scale = 1.0;
+  double baseScale = 1.0;
+
+  double rotation = 0.0;
+  double baseRotation = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    x = MediaQuery.of(widget.context).size.width / 2;
+    y = MediaQuery.of(widget.context).size.height / 3;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: x,
+      top: y,
+
+      child: GestureDetector(
+        onScaleStart: (details) {
+          baseScale = scale;
+          baseRotation = rotation;
+        },
+        onScaleUpdate: (details) {
+          setState(() {
+            // Move the image
+            x += details.focalPointDelta.dx;
+            y += details.focalPointDelta.dy;
+
+            // Scale & rotate
+            scale = baseScale * details.scale;
+            rotation = baseRotation + details.rotation;
+          });
+        },
+
+        child: Transform.rotate(
+          angle: rotation,
+          child: Transform.scale(
+            scale: scale,
+            child: Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Image.file(widget.image, fit: BoxFit.cover),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

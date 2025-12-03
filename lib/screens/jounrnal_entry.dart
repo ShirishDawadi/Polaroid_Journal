@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/widgets/color_picker.dart';
+import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
 
 class JournalEntryScreen extends StatefulWidget {
@@ -12,6 +15,18 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   bool isOpen = true;
   int selectedTool = -1;
   List<MovableTextField> texts = [];
+
+  List<MovablePhoto> photos = [];
+  Future<void> pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked == null) return;
+
+    setState(() {
+      photos.add(MovablePhoto(image: File(picked.path), context: context));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +42,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             color: currentColor,
             border: Border.all(color: Colors.brown, width: 2),
           ),
-          child: Stack(children: texts),
+          child: Stack(children: [...photos, ...texts]),
         ),
       ),
       floatingActionButton: Container(
@@ -50,10 +65,15 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     ? [
                         IconButton(
                           icon: selectedTool == 0
-                              ? Icon(Icons.photo_library)
-                              : Icon(Icons.photo_library_outlined),
-                          onPressed: () => setState(() => selectedTool = 0),
+                              ? const Icon(Icons.photo_library)
+                              : const Icon(Icons.photo_library_outlined),
+
+                          onPressed: () async {
+                            setState(() => selectedTool = 0);
+                            await pickImage();
+                          },
                         ),
+
                         IconButton(
                           icon: selectedTool == 2
                               ? Icon(Icons.text_fields)
@@ -100,12 +120,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     : [],
               ),
             ),
-            
+
             // Arrow button
             AnimatedRotation(
               duration: Duration(milliseconds: 300),
               curve: Curves.ease,
-              turns: isOpen? 0 :0.5 ,
+              turns: isOpen ? 0 : 0.5,
               child: IconButton(
                 icon: Icon(Icons.arrow_forward_ios_rounded),
                 onPressed: () => setState(() {
