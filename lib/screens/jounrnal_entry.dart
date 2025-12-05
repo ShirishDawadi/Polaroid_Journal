@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:polaroid_journal/widgets/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker.dart';
+import 'package:polaroid_journal/widgets/journal_floating_bar.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
 
@@ -11,7 +13,10 @@ class JournalEntryScreen extends StatefulWidget {
 }
 
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
-  Color currentColor = Colors.white;
+  Color currentBackgroundColor = Colors.white;
+  Color currentTextColor = Colors.black;
+  Color currentBrushColor = Colors.black;
+
   bool isOpen = true;
   int selectedTool = -1;
   List<MovableTextField> texts = [];
@@ -28,114 +33,97 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     });
   }
 
+   void addTextField() {
+    final key = GlobalKey<MovableTextFieldState>();
+    setState(() {
+      texts.add(MovableTextField(
+        key: key,
+        onRemove: (fieldKey) {
+          setState(() {
+            texts.removeWhere((t) => t.key == fieldKey);
+          });
+        },
+        context: context,
+        textColor: currentTextColor,
+      ));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("New Journal Entry")),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Container(
-          margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
-          decoration: BoxDecoration(
-            color: currentColor,
-            border: Border.all(color: Colors.brown, width: 2),
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Container(
+              margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
+              decoration: BoxDecoration(
+                color: currentBackgroundColor,
+                border: Border.all(color: Colors.brown, width: 2),
+              ),
+              child: Stack(children: [...photos, ...texts]),
+            ),
           ),
-          child: Stack(children: [...photos, ...texts]),
-        ),
+
+          if (selectedTool == 3 || selectedTool == 2)
+            Positioned(
+              bottom: 80,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: 0.9,
+                  duration: Duration(milliseconds: 200),
+                  child: ColorFloatingBar(
+                    onSelect: (color) {
+                      setState(() {
+                        if (selectedTool == 2) currentTextColor = color;
+                        if (selectedTool == 3) currentBackgroundColor = color;
+                      });
+                    },
+                    onOpenColorPicker: () async {
+                      final picked = await showDialog<Color>(
+                        context: context,
+                        builder: (_) {
+                          Color initialColor = Colors.white;
+                          if (selectedTool == 3) initialColor = currentBackgroundColor;
+                          if (selectedTool == 2) initialColor = currentTextColor;
+                          return ColorPickerDialog(initialColor: initialColor);
+                        },
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          if (selectedTool == 2) currentTextColor = picked;
+                          if (selectedTool == 3) currentBackgroundColor = picked;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-      floatingActionButton: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        height: 60,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSize(
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeIn,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: isOpen
-                    ? [
-                        IconButton(
-                          icon: selectedTool == 0
-                              ? const Icon(Icons.photo_library)
-                              : const Icon(Icons.photo_library_outlined),
+      floatingActionButton: JournalFloatingBar(
+        isOpen: isOpen,
+        selectedTool: selectedTool,
+        onToolSelected: (tool) async {
+          setState(() => selectedTool = tool);
 
-                          onPressed: () async {
-                            setState(() => selectedTool = 0);
-                            await pickImage();
-                          },
-                        ),
+          if (tool == 0) await pickImage();
 
-                        IconButton(
-                          icon: selectedTool == 2
-                              ? Icon(Icons.text_fields)
-                              : Icon(Icons.text_fields_outlined),
-                          onPressed: () {
-                            setState(() {
-                              selectedTool = 2;
-                              texts.add(
-                                MovableTextField(
-                                  onRemove: () {
-                                    setState(() {
-                                      texts.removeLast();
-                                    });
-                                  },
-                                  context: context,
-                                ),
-                              );
-                            });
-                          },
-                        ),
-                        IconButton(
-                          icon: selectedTool == 1
-                              ? Icon(Icons.brush)
-                              : Icon(Icons.brush_outlined),
-                          onPressed: () => setState(() => selectedTool = 1),
-                        ),
-                        IconButton(
-                          icon: selectedTool == 3
-                              ? Icon(Icons.format_paint)
-                              : Icon(Icons.format_paint_outlined),
-                          onPressed: () async {
-                            setState(() => selectedTool = 3);
-                            final picked = await showDialog<Color>(
-                              context: context,
-                              builder: (_) =>
-                                  ColorPickerDialog(initialColor: currentColor),
-                            );
-                            if (picked != null) {
-                              setState(() => currentColor = picked);
-                            }
-                          },
-                        ),
-                      ]
-                    : [],
-              ),
-            ),
-
-            // Arrow button
-            AnimatedRotation(
-              duration: Duration(milliseconds: 300),
-              curve: Curves.ease,
-              turns: isOpen ? 0 : 0.5,
-              child: IconButton(
-                icon: Icon(Icons.arrow_forward_ios_rounded),
-                onPressed: () => setState(() {
-                  selectedTool = -1;
-                  isOpen = !isOpen;
-                }),
-              ),
-            ),
-          ],
-        ),
+          if (tool == 2)  addTextField();
+        },
+        onToggle: () {
+          setState(() {
+            selectedTool = -1;
+            isOpen = !isOpen;
+          });
+        },
       ),
     );
   }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 
 class MovableTextField extends StatefulWidget {
-  final Function() onRemove;
+  final Function(Key) onRemove;
   final BuildContext context;
+  final Color textColor;
 
-  const MovableTextField({super.key, required this.onRemove, required this.context});
+  const MovableTextField({super.key, required this.onRemove, required this.context, required this.textColor});
 
   @override
-  State<MovableTextField> createState() => _MovableTextFieldState();
+  State<MovableTextField> createState() => MovableTextFieldState();
 }
 
-class _MovableTextFieldState extends State<MovableTextField> {
+class MovableTextFieldState extends State<MovableTextField> {
   double x = 0;
   double y = 0;
-  
+  Color? textColor;
   TextEditingController controller = TextEditingController();
   FocusNode focus = FocusNode();
 
@@ -21,12 +22,14 @@ class _MovableTextFieldState extends State<MovableTextField> {
   void initState() {
     super.initState();
 
+    textColor=widget.textColor;
+
     x = MediaQuery.of(widget.context).size.width / 2;
     y = MediaQuery.of(widget.context).size.height / 3;
     focus.requestFocus();
     focus.addListener(() {
       if (!focus.hasFocus && controller.text.trim().isEmpty) {
-        widget.onRemove();
+        widget.onRemove(widget.key!);
       }
     });
   }
@@ -50,12 +53,13 @@ class _MovableTextFieldState extends State<MovableTextField> {
             child: TextField(
               controller: controller,
               focusNode: focus,
+              style: TextStyle(color:textColor),
               cursorColor: Theme.of(context).primaryColor,
               decoration: InputDecoration(border: InputBorder.none),
               maxLines: null,
               onChanged: (value) {
                 if (value.trim().isEmpty && !focus.hasFocus) {
-                  widget.onRemove();
+                  widget.onRemove(widget.key!);
                 }
               },
             ),
