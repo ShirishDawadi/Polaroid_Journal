@@ -71,7 +71,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
           if (selectedTool == 3 || selectedTool == 2)
             Positioned(
-              bottom: 80,
+              bottom: 105,
               left: 0,
               right: 0,
               child: Center(

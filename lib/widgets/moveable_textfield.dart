@@ -14,6 +14,12 @@ class MovableTextField extends StatefulWidget {
 class MovableTextFieldState extends State<MovableTextField> {
   double x = 0;
   double y = 0;
+  double scale = 1.0;
+  double baseScale = 1.0;
+
+  double rotation = 0.0;
+  double baseRotation = 0.0;
+
   Color? textColor;
   TextEditingController controller = TextEditingController();
   FocusNode focus = FocusNode();
@@ -40,10 +46,17 @@ class MovableTextFieldState extends State<MovableTextField> {
       left: x,
       top: y,
       child: GestureDetector(
-        onPanUpdate: (details) {
+        onScaleStart: (details) {
+          baseScale = scale;
+          baseRotation = rotation;
+        },
+        onScaleUpdate: (details) {
           setState(() {
-            x += details.delta.dx;
-            y += details.delta.dy;
+            x += details.focalPointDelta.dx;
+            y += details.focalPointDelta.dy;
+
+            scale = baseScale * details.scale;
+            rotation = baseRotation + details.rotation;
           });
         },
         child: IntrinsicWidth(

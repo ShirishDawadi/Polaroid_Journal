@@ -18,7 +18,7 @@ class JournalFloatingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       height: 60,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,

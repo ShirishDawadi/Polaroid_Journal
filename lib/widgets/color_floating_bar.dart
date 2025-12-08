@@ -26,7 +26,7 @@ class ColorFloatingBar extends StatelessWidget {
       height: 50,
       padding: EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha:0.90),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
@@ -53,7 +53,7 @@ class ColorFloatingBar extends StatelessWidget {
               )),
 
           IconButton(
-            icon: Icon(Icons.colorize),
+            icon: Icon(Icons.colorize_sharp),
             onPressed: onOpenColorPicker,
           ),
         ],

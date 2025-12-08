@@ -41,11 +41,9 @@ class _MovablePhotoState extends State<MovablePhoto> {
         },
         onScaleUpdate: (details) {
           setState(() {
-            // Move the image
             x += details.focalPointDelta.dx;
             y += details.focalPointDelta.dy;
 
-            // Scale & rotate
             scale = baseScale * details.scale;
             rotation = baseRotation + details.rotation;
           });
@@ -57,18 +55,21 @@ class _MovablePhotoState extends State<MovablePhoto> {
             scale: scale,
             child: Container(
               width: 170,
-              height: 170,
+              height: 200,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 10,
+                    color: Colors.black.withValues(alpha: 0.9),
+                    blurRadius: 5,
                   ),
                 ],
               ),
               clipBehavior: Clip.hardEdge,
-              child: Image.file(widget.image, fit: BoxFit.cover),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15,15,15,45),
+                child: Image.file(widget.image, fit: BoxFit.cover,),
+              ),
             ),
           ),
         ),
