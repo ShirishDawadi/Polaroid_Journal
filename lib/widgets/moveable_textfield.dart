@@ -5,7 +5,12 @@ class MovableTextField extends StatefulWidget {
   final BuildContext context;
   final Color textColor;
 
-  const MovableTextField({super.key, required this.onRemove, required this.context, required this.textColor});
+  const MovableTextField({
+    super.key,
+    required this.onRemove,
+    required this.context,
+    required this.textColor,
+  });
 
   @override
   State<MovableTextField> createState() => MovableTextFieldState();
@@ -24,13 +29,21 @@ class MovableTextFieldState extends State<MovableTextField> {
   TextEditingController controller = TextEditingController();
   FocusNode focus = FocusNode();
 
+  bool get isFocused => focus.hasFocus;
+
+  void updateTextColor(Color color) {
+    setState(() {
+      textColor = color;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
-    textColor=widget.textColor;
+    textColor = widget.textColor;
 
-    x = MediaQuery.of(widget.context).size.width / 2;
+    x = MediaQuery.of(widget.context).size.width / 2.5;
     y = MediaQuery.of(widget.context).size.height / 3;
     focus.requestFocus();
     focus.addListener(() {
@@ -66,7 +79,7 @@ class MovableTextFieldState extends State<MovableTextField> {
             child: TextField(
               controller: controller,
               focusNode: focus,
-              style: TextStyle(color:textColor),
+              style: TextStyle(color: textColor),
               cursorColor: textColor,
               decoration: InputDecoration(border: InputBorder.none),
               maxLines: null,

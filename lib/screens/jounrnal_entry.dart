@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChannels;
+import 'package:flutter_painting_tools/flutter_painting_tools.dart' show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/widgets/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker.dart';
@@ -17,9 +19,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color currentTextColor = Colors.black;
   Color currentBrushColor = Colors.black;
   Color currentColor = Colors.black;
+  bool isIgnoring = true;
+  late final PaintingBoardController controller;
 
   bool isOpen = true;
   int selectedTool = -1;
+  List<GlobalKey<MovableTextFieldState>> textKeys = [];
   List<MovableTextField> texts = [];
 
   List<MovablePhoto> photos = [];
@@ -36,6 +41,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   void addTextField() {
     final key = GlobalKey<MovableTextFieldState>();
+    textKeys.add(key);
     setState(() {
       texts.add(
         MovableTextField(
@@ -50,6 +56,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         ),
       );
     });
+  }
+
+  @override
+  void initState() {
+    controller = PaintingBoardController();
+    super.initState();
   }
 
   @override
@@ -68,7 +80,21 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 color: currentBackgroundColor,
                 border: Border.all(color: Colors.brown, width: 2),
               ),
-              child: Stack(children: [...photos, ...texts]),
+              child: Stack(
+                children: [
+                  ...photos,
+                  ...texts,
+                  IgnorePointer(
+                    ignoring: isIgnoring,
+                    child: Positioned.fill(
+                      child: PaintingBoard(
+                        boardBackgroundColor: Colors.transparent,
+                        controller: controller,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -78,7 +104,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (selectedTool != 0 && selectedTool != -1 )
+          if (selectedTool != 0 && selectedTool != -1)
             AnimatedOpacity(
               opacity: 0.9,
               duration: Duration(milliseconds: 200),
@@ -86,33 +112,61 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 selectedColor: currentColor,
                 onSelect: (color) {
                   setState(() {
-                    if (selectedTool == 2) currentTextColor = color;
+                    if (selectedTool == 1) {
+                      controller.changeBrushColor(color);
+                      currentBrushColor = color;
+                    }
+
+                    if (selectedTool == 2) {
+                      currentTextColor = color;
+                      for (var key in textKeys) {
+                        final state = key.currentState;
+                        if (state != null && state.isFocused) {
+                          state.updateTextColor(color);
+                          break;
+                        }
+                      }
+                    }
+
                     if (selectedTool == 3) currentBackgroundColor = color;
-                    if (selectedTool == 1) currentBrushColor = color;
+
                     currentColor = color;
                   });
                 },
-                onOpenColorPicker: () async {
-                  final picked = await showDialog<Color>(
+                onOpenColorPicker: () {
+                  SystemChannels.textInput.invokeMethod('TextInput.hide');
+                  ColorPickerOverlay(
                     context: context,
-                    builder: (_) {
-                      Color initialColor = currentColor;
-                      return ColorPickerDialog(initialColor: initialColor);
+                    initialColor: currentColor,
+                    onSelect: (picked) {
+                      setState(() {
+                        if (selectedTool == 1) {
+                          controller.changeBrushColor(picked);
+                          currentBrushColor = picked;
+                        }
+
+                        if (selectedTool == 2) {
+                          SystemChannels.textInput.invokeMethod('TextInput.show',);
+                          currentTextColor = picked;
+                          for (var key in textKeys) {
+                            final state = key.currentState;
+                            if (state != null && state.isFocused) {
+                              state.updateTextColor(picked);
+                              break;
+                            }
+                          }
+                        }
+                        if (selectedTool == 3) currentBackgroundColor = picked;
+                        
+                        currentColor = picked;
+                      });
                     },
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      if (selectedTool == 2) currentTextColor = picked;
-                      if (selectedTool == 3) currentBackgroundColor = picked;
-                      if (selectedTool == 1) currentBrushColor = picked;
-                      currentColor = picked;
-                    });
-                  }
+                  ).show();
                 },
               ),
             ),
-            
-          SizedBox(height: 5,),
+
+          SizedBox(height: 5),
 
           JournalFloatingBar(
             isOpen: isOpen,
@@ -120,9 +174,14 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             onToolSelected: (tool) async {
               setState(() {
                 selectedTool = tool;
-                if(selectedTool == 1) currentColor = currentBrushColor;
-                if(selectedTool == 2) currentColor = currentTextColor;
-                if(selectedTool == 3) currentColor = currentBackgroundColor;
+                if (selectedTool == 1) {
+                  isIgnoring = false;
+                  currentColor = currentBrushColor;
+                } else {
+                  isIgnoring = true;
+                }
+                if (selectedTool == 2) currentColor = currentTextColor;
+                if (selectedTool == 3) currentColor = currentBackgroundColor;
               });
 
               if (tool == 0) await pickImage();

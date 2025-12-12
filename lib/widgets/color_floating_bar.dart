@@ -24,42 +24,58 @@ class ColorFloatingBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isCustomColor = !colors.contains(selectedColor);
+
     return Container(
       height: 50,
       padding: EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-          )
-        ],
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...colors.map((c) => GestureDetector(
-                onTap: () => onSelect(c),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  margin: EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: c,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: c == selectedColor ? Colors.black : Colors.black12,
-                      width: c == selectedColor ? 3 : 1,
-                    ),
+          ...colors.map(
+            (c) => GestureDetector(
+              onTap: () => onSelect(c),
+              child: Container(
+                width: 28,
+                height: 28,
+                margin: EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  color: c,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: c == selectedColor ? Colors.black : Colors.black12,
+                    width: c == selectedColor ? 3 : 1,
                   ),
                 ),
-              )),
+              ),
+            ),
+          ),
 
-          IconButton(
-            icon: Icon(Icons.colorize_sharp),
-            onPressed: onOpenColorPicker,
+          Container(
+            width: 28,
+            height: 28,
+            margin: EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isCustomColor ? Colors.black : Colors.black12,
+                width: isCustomColor ? 3 : 1,
+              ),
+            ),
+            child: GestureDetector(
+              onTap: onOpenColorPicker,
+              child: Center(
+                child: Icon(
+                  Icons.colorize_sharp,
+                  size: 18,
+                ),
+              ),
+            ),
           ),
         ],
       ),
