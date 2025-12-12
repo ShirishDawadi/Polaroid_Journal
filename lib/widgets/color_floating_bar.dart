@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class ColorFloatingBar extends StatelessWidget {
   final Function(Color) onSelect;
   final VoidCallback onOpenColorPicker;
+  final Color selectedColor;
 
   ColorFloatingBar({
+    required this.selectedColor,
     required this.onSelect,
     required this.onOpenColorPicker,
   });
@@ -47,7 +49,10 @@ class ColorFloatingBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: c,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black12),
+                    border: Border.all(
+                      color: c == selectedColor ? Colors.black : Colors.black12,
+                      width: c == selectedColor ? 3 : 1,
+                    ),
                   ),
                 ),
               )),

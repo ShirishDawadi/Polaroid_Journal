@@ -67,7 +67,7 @@ class MovableTextFieldState extends State<MovableTextField> {
               controller: controller,
               focusNode: focus,
               style: TextStyle(color:textColor),
-              cursorColor: Theme.of(context).primaryColor,
+              cursorColor: textColor,
               decoration: InputDecoration(border: InputBorder.none),
               maxLines: null,
               onChanged: (value) {
