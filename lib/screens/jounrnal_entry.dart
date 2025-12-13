@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_painting_tools/flutter_painting_tools.dart' show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/widgets/color_floating_bar.dart';
@@ -134,7 +133,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   });
                 },
                 onOpenColorPicker: () {
-                  SystemChannels.textInput.invokeMethod('TextInput.hide');
                   ColorPickerOverlay(
                     context: context,
                     initialColor: currentColor,
@@ -146,7 +144,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         }
 
                         if (selectedTool == 2) {
-                          SystemChannels.textInput.invokeMethod('TextInput.show',);
                           currentTextColor = picked;
                           for (var key in textKeys) {
                             final state = key.currentState;

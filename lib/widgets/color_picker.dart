@@ -32,93 +32,107 @@ class ColorPickerOverlay {
           ),
 
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.3,
-            left: 20,
+            top: 100,
             right: 20,
             child: Material(
               color: Colors.transparent,
-              child: Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 1.4,
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ColorPicker(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 150,
+                      child: ColorPicker(
+                        portraitOnly: true,
                         pickerColor: tempColor,
                         enableAlpha: false,
                         displayThumbColor: false,
                         labelTypes: [],
-                        pickerAreaHeightPercent: 0.7,
+                        pickerAreaHeightPercent: 0.5,
                         onColorChanged: (color) {
                           tempColor = color;
                           hexController.text =
                               '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
                         },
                       ),
-                      SizedBox(height: 0),
-                      TextField(
-                        controller: hexController,
-                        cursorColor: Theme.of(context).primaryColor,
-                        decoration: InputDecoration(
-                          labelText: 'Hex code',
-                          labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor),
+                    ),
+                    SizedBox(width: 20),
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: TextField(
+                            controller: hexController,
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Hex code',
+                              labelStyle: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              try {
+                                if (value.startsWith('#')) {
+                                  String hex = value.substring(1);
+
+                                  hex = hex.replaceAll(
+                                    RegExp(r'[^0-9a-fA-F]'),
+                                    '',
+                                  );
+
+                                  if (hex.length > 6) {
+                                    hex = hex.substring(hex.length - 6);
+                                  }
+
+                                  if (hex.length < 6) {
+                                    hex = hex.padRight(6, '0');
+                                  }
+
+                                  tempColor = Color(
+                                    int.parse('FF$hex', radix: 16),
+                                  );
+
+                                  hexController.text = '#${hex.toUpperCase()}';
+                                  hexController.selection =
+                                      TextSelection.fromPosition(
+                                        TextPosition(
+                                          offset: hexController.text.length,
+                                        ),
+                                      );
+                                }
+                              } catch (_) {}
+                            },
                           ),
                         ),
-                        onChanged: (value) {
-                          try {
-                            if (value.startsWith('#')) {
-                              String hex = value.substring(1);
 
-                              hex = hex.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
-
-                              if (hex.length > 6) {
-                                hex = hex.substring(hex.length - 6);
-                              }
-
-                              if (hex.length < 6) {
-                                hex = hex.padRight(6, '0');
-                              }
-
-                              tempColor = Color(int.parse('FF$hex', radix: 16));
-
-                              hexController.text = '#${hex.toUpperCase()}';
-                              hexController.selection =
-                                  TextSelection.fromPosition(
-                                TextPosition(offset: hexController.text.length),
-                              );
-                            }
-                          } catch (_) {}
-                        },
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColor,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface,
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surface,
+                          ),
+                          child: Text('Select'),
+                          onPressed: () {
+                            onSelect(tempColor);
+                            hide();
+                          },
                         ),
-                        child: Text('Select'),
-                        onPressed: () {
-                          onSelect(tempColor);
-                          hide();
-                        },
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
