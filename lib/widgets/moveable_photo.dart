@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class MovablePhoto extends StatefulWidget {
@@ -34,25 +35,31 @@ class _MovablePhotoState extends State<MovablePhoto> {
       left: x,
       top: y,
 
-      child: GestureDetector(
-        onScaleStart: (details) {
-          baseScale = scale;
-          baseRotation = rotation;
-        },
-        onScaleUpdate: (details) {
-          setState(() {
-            x += details.focalPointDelta.dx;
-            y += details.focalPointDelta.dy;
+      child: Transform.rotate(
+        angle: rotation,
+        child: Transform.scale(
+          scale: scale,
+          child: GestureDetector(
+            onScaleStart: (details) {
+              baseScale = scale;
+              baseRotation = rotation;
+            },
+            onScaleUpdate: (details) {
+              setState(() {
+                final dx = details.focalPointDelta.dx;
+                final dy = details.focalPointDelta.dy;
 
-            scale = baseScale * details.scale;
-            rotation = baseRotation + details.rotation;
-          });
-        },
+                final cos = math.cos(-rotation);
+                final sin = math.sin(-rotation);
 
-        child: Transform.rotate(
-          angle: rotation,
-          child: Transform.scale(
-            scale: scale,
+                x += dx * cos - dy * sin;
+                y += dx * sin + dy * cos;
+
+                scale = baseScale * details.scale;
+                rotation = baseRotation + details.rotation;
+              });
+            },
+
             child: Container(
               width: 170,
               height: 200,
@@ -67,8 +74,8 @@ class _MovablePhotoState extends State<MovablePhoto> {
               ),
               clipBehavior: Clip.hardEdge,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15,15,15,45),
-                child: Image.file(widget.image, fit: BoxFit.cover,),
+                padding: const EdgeInsets.fromLTRB(15, 15, 15, 45),
+                child: Image.file(widget.image, fit: BoxFit.cover),
               ),
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class MovableTextField extends StatefulWidget {
@@ -100,31 +102,40 @@ class MovableTextFieldState extends State<MovableTextField> {
     return Positioned(
       left: x,
       top: y,
-      child: GestureDetector(
-        onScaleStart: (details) {
-          baseScale = scale;
-          baseRotation = rotation;
-        },
-        onScaleUpdate: (details) {
-          if (!focus.hasFocus) {
-            setState(() {
-              x += details.focalPointDelta.dx;
-              y += details.focalPointDelta.dy;
-
-              scale = baseScale * details.scale;
-              rotation = baseRotation + details.rotation;
-
-              origX = x;
-              origY = y;
-              origScale = scale;
-              origRotation = rotation;
-            });
-          }
-        },
-        child: Transform.rotate(
-          angle: rotation,
-          child: Transform.scale(
-            scale: scale,
+      child: Transform.rotate(
+        angle: rotation,
+        child: Transform.scale(
+          scale: scale,
+          child: GestureDetector(
+            onScaleStart: (details) {
+              baseScale = scale;
+              baseRotation = rotation;
+            },
+            onScaleUpdate: (details) {
+              if (!focus.hasFocus) {
+                setState(() {
+                  final dx = details.focalPointDelta.dx;
+                  final dy = details.focalPointDelta.dy;
+          
+                  final cos = math.cos(-rotation);
+                  final sin = math.sin(-rotation);
+          
+                  x += dx * cos - dy * sin;
+                  y += dx * sin + dy * cos;
+                  
+                  origX = x;
+                  origY = y;
+          
+                  if (details.pointerCount >= 2) {
+                    scale = baseScale * details.scale;
+                    rotation = baseRotation + details.rotation;
+          
+                    origScale = scale;
+                    origRotation = rotation;
+                  }
+                });
+              }
+            },
             child: IntrinsicWidth(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -135,7 +146,7 @@ class MovableTextFieldState extends State<MovableTextField> {
                       ? MediaQuery.of(context).size.width
                       : null,
                   child: Padding(
-                    padding:  const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: TextField(
                       controller: controller,
                       focusNode: focus,
