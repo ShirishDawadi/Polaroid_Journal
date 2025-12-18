@@ -18,8 +18,6 @@ class JournalFloatingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      height: 60,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
@@ -27,13 +25,13 @@ class JournalFloatingBar extends StatelessWidget {
           BoxShadow(color: Colors.black26, blurRadius: 10),
         ],
       ),
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeIn,
-            child: Row(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: isOpen
                   ? [
@@ -75,8 +73,9 @@ class JournalFloatingBar extends StatelessWidget {
           ),
           AnimatedRotation(
             duration: const Duration(milliseconds: 300),
-            turns: isOpen ? 0 : 0.5,
+            turns: isOpen ? 0.25 : 0.75,
             child: IconButton(
+              iconSize: 10,
               icon: const Icon(Icons.arrow_forward_ios_rounded),
               onPressed: onToggle,
             ),

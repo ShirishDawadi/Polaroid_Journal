@@ -20,7 +20,7 @@ class _MovablePhotoState extends State<MovablePhoto> {
 
   double rotation = 0.0;
   double baseRotation = 0.0;
-
+  
   @override
   void initState() {
     super.initState();
@@ -46,20 +46,21 @@ class _MovablePhotoState extends State<MovablePhoto> {
             },
             onScaleUpdate: (details) {
               setState(() {
+                scale = baseScale * details.scale;
+                rotation = baseRotation + details.rotation;
+
+                if (details.pointerCount > 1) return;
+
                 final dx = details.focalPointDelta.dx;
                 final dy = details.focalPointDelta.dy;
 
-                final cos = math.cos(-rotation);
-                final sin = math.sin(-rotation);
+                final cos = math.cos(rotation);
+                final sin = math.sin(rotation);
 
-                x += dx * cos - dy * sin;
-                y += dx * sin + dy * cos;
-
-                scale = baseScale * details.scale;
-                rotation = baseRotation + details.rotation;
+                x += (dx * cos - dy * sin) * scale;
+                y += (dx * sin + dy * cos) * scale;
               });
             },
-
             child: Container(
               width: 170,
               height: 200,

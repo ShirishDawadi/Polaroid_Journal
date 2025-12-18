@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_painting_tools/flutter_painting_tools.dart' show PaintingBoard, PaintingBoardController;
+import 'package:flutter_painting_tools/flutter_painting_tools.dart'
+    show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/widgets/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
-// import 'package:polaroid_journal/widgets/color_picker.dart';
 import 'package:polaroid_journal/widgets/journal_floating_bar.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
+import 'package:polaroid_journal/widgets/journal_sub_fab.dart';
 
 class JournalEntryScreen extends StatefulWidget {
   @override
@@ -22,8 +23,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   bool isIgnoring = true;
   late final PaintingBoardController controller;
 
-  bool isOpen = true;
+  bool isOpen = false;
   int selectedTool = -1;
+  int selectedSubTool = -1;
   List<GlobalKey<MovableTextFieldState>> textKeys = [];
   List<MovableTextField> texts = [];
 
@@ -104,94 +106,108 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (selectedTool != 0 && selectedTool != -1)
-            AnimatedOpacity(
-              opacity: 0.9,
-              duration: Duration(milliseconds: 200),
-              child: ColorFloatingBar(
-                selectedColor: currentColor,
-                onSelect: (color) {
-                  setState(() {
-                    if (selectedTool == 1) {
-                      controller.changeBrushColor(color);
-                      currentBrushColor = color;
-                    }
-
-                    if (selectedTool == 2) {
-                      currentTextColor = color;
-                      for (var key in textKeys) {
-                        final state = key.currentState;
-                        if (state != null && state.isFocused) {
-                          state.updateTextColor(color);
-                          break;
-                        }
+          if (selectedSubTool == 3 )
+            ColorFloatingBar(
+              selectedColor: currentColor,
+              onSelect: (color) {
+                setState(() {
+                  if (selectedTool == 1) {
+                    controller.changeBrushColor(color);
+                    currentBrushColor = color;
+                  }
+            
+                  if (selectedTool == 2) {
+                    currentTextColor = color;
+                    for (var key in textKeys) {
+                      final state = key.currentState;
+                      if (state != null && state.isFocused) {
+                        state.updateTextColor(color);
+                        break;
                       }
                     }
-
-                    if (selectedTool == 3) currentBackgroundColor = color;
-
-                    currentColor = color;
-                  });
-                },
-                onOpenColorPicker: () {
-                  ColorPickerOverlay(
-                    context: context,
-                    initialColor: currentColor,
-                    onSelect: (picked) {
-                      setState(() {
-                        if (selectedTool == 1) {
-                          controller.changeBrushColor(picked);
-                          currentBrushColor = picked;
-                        }
-
-                        if (selectedTool == 2) {
-                          currentTextColor = picked;
-                          for (var key in textKeys) {
-                            final state = key.currentState;
-                            if (state != null && state.isFocused) {
-                              state.updateTextColor(picked);
-                              break;
-                            }
+                  }
+            
+                  if (selectedTool == 3) currentBackgroundColor = color;
+            
+                  currentColor = color;
+                });
+              },
+              onOpenColorPicker: () {
+                ColorPickerOverlay(
+                  context: context,
+                  initialColor: currentColor,
+                  onSelect: (picked) {
+                    setState(() {
+                      if (selectedTool == 1) {
+                        controller.changeBrushColor(picked);
+                        currentBrushColor = picked;
+                      }
+            
+                      if (selectedTool == 2) {
+                        currentTextColor = picked;
+                        for (var key in textKeys) {
+                          final state = key.currentState;
+                          if (state != null && state.isFocused) {
+                            state.updateTextColor(picked);
+                            break;
                           }
                         }
-                        if (selectedTool == 3) currentBackgroundColor = picked;
-                        
-                        currentColor = picked;
-                      });
-                    },
-                  ).show();
-                },
-              ),
+                      }
+                      if (selectedTool == 3) currentBackgroundColor = picked;
+                      currentColor = picked;
+                    });
+                  },
+                ).show();
+              },
             ),
-
           SizedBox(height: 5),
 
-          JournalFloatingBar(
-            isOpen: isOpen,
-            selectedTool: selectedTool,
-            onToolSelected: (tool) async {
-              setState(() {
-                selectedTool = tool;
-                if (selectedTool == 1) {
-                  isIgnoring = false;
-                  currentColor = currentBrushColor;
-                } else {
-                  isIgnoring = true;
-                }
-                if (selectedTool == 2) currentColor = currentTextColor;
-                if (selectedTool == 3) currentColor = currentBackgroundColor;
-              });
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (selectedTool != -1)
+                JournalSubFAB(
+                  selectedTool: selectedTool,
+                  selectedSubTool: selectedSubTool,
+                  onToolSelected: (selected) {
+                    setState(() {
+                      selectedSubTool = selected;
+                    });
+                  },
+                ),
 
-              if (tool == 0) await pickImage();
+              const SizedBox(width: 15),
 
-              if (tool == 2) addTextField();
-            },
-            onToggle: () {
-              setState(() {
-                selectedTool = -1;
-                isOpen = !isOpen;
-              });
-            },
+              JournalFloatingBar(
+                isOpen: isOpen,
+                selectedTool: selectedTool,
+                onToolSelected: (tool) async {
+                  setState(() {
+                    isOpen = false;
+                    selectedTool = tool;
+                    if (selectedTool == 1) {
+                      isIgnoring = false;
+                      currentColor = currentBrushColor;
+                    } else {
+                      isIgnoring = true;
+                    }
+                    if (selectedTool == 2) currentColor = currentTextColor;
+                    if (selectedTool == 3) currentColor = currentBackgroundColor;
+                  });
+
+                  if (tool == 0) await pickImage();
+
+                  if (tool == 2) addTextField();
+                },
+                onToggle: () {
+                  setState(() {
+                    selectedSubTool = -1;
+                    isOpen = !isOpen;
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
