@@ -28,8 +28,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   int selectedSubTool = -1;
   List<GlobalKey<MovableTextFieldState>> textKeys = [];
   List<MovableTextField> texts = [];
+  GlobalKey<MovableTextFieldState>? selectedTextKey;
 
   List<MovablePhoto> photos = [];
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -43,6 +45,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   void addTextField() {
     final key = GlobalKey<MovableTextFieldState>();
+
     textKeys.add(key);
     setState(() {
       texts.add(
@@ -51,13 +54,42 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           onRemove: (fieldKey) {
             setState(() {
               texts.removeWhere((t) => t.key == fieldKey);
+              textKeys.removeWhere((k) => k == fieldKey);
+
+              if (selectedTextKey == fieldKey) {
+                selectedTextKey = null;
+              }
             });
           },
           context: context,
-          textColor: currentTextColor,
+          onFocusChanged: (key, isFocused) {
+            setState(() {
+              if (isFocused) {
+                selectedTextKey = key as GlobalKey<MovableTextFieldState>;
+              }
+            });
+          },
         ),
       );
     });
+  }
+
+  void changeColor(Color color) {
+    if (selectedTool == 1) {
+      controller.changeBrushColor(color);
+      currentBrushColor = color;
+    }
+
+    if (selectedTool == 2) {
+      currentTextColor = color;
+      if (selectedTextKey != null && selectedTextKey!.currentState != null) {
+        selectedTextKey!.currentState!.setTextColor(color);
+      }
+    }
+
+    if (selectedTool == 3) currentBackgroundColor = color;
+
+    currentColor = color;
   }
 
   @override
@@ -106,56 +138,18 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (selectedSubTool == 3 )
+          if (selectedSubTool == 3)
             ColorFloatingBar(
               selectedColor: currentColor,
               onSelect: (color) {
-                setState(() {
-                  if (selectedTool == 1) {
-                    controller.changeBrushColor(color);
-                    currentBrushColor = color;
-                  }
-            
-                  if (selectedTool == 2) {
-                    currentTextColor = color;
-                    for (var key in textKeys) {
-                      final state = key.currentState;
-                      if (state != null && state.isFocused) {
-                        state.updateTextColor(color);
-                        break;
-                      }
-                    }
-                  }
-            
-                  if (selectedTool == 3) currentBackgroundColor = color;
-            
-                  currentColor = color;
-                });
+                setState(() => changeColor(color));
               },
               onOpenColorPicker: () {
                 ColorPickerOverlay(
                   context: context,
                   initialColor: currentColor,
                   onSelect: (picked) {
-                    setState(() {
-                      if (selectedTool == 1) {
-                        controller.changeBrushColor(picked);
-                        currentBrushColor = picked;
-                      }
-            
-                      if (selectedTool == 2) {
-                        currentTextColor = picked;
-                        for (var key in textKeys) {
-                          final state = key.currentState;
-                          if (state != null && state.isFocused) {
-                            state.updateTextColor(picked);
-                            break;
-                          }
-                        }
-                      }
-                      if (selectedTool == 3) currentBackgroundColor = picked;
-                      currentColor = picked;
-                    });
+                    setState(() => changeColor(picked));
                   },
                 ).show();
               },
@@ -175,6 +169,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                       selectedSubTool = selected;
                     });
                   },
+                  selectedTextKey: selectedTextKey,
                 ),
 
               const SizedBox(width: 15),

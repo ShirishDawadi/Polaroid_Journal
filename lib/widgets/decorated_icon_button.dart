@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class DecoratedIconButton extends StatelessWidget {
   final IconData icon;
+  final Color? color;
   final VoidCallback onPressed;
 
   const DecoratedIconButton({
     super.key,
     required this.icon,
+    this.color,
     required this.onPressed,
   });
 
@@ -22,6 +24,7 @@ class DecoratedIconButton extends StatelessWidget {
       ),
       child: IconButton(
         icon: Icon(icon),
+        color: color,
         onPressed: onPressed,
       ),
     );
