@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_painting_tools/flutter_painting_tools.dart'
     show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
-import 'package:polaroid_journal/widgets/color_floating_bar.dart';
+import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
-import 'package:polaroid_journal/widgets/journal_floating_bar.dart';
+import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
+import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
-import 'package:polaroid_journal/widgets/journal_sub_fab.dart';
+import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
 
 class JournalEntryScreen extends StatefulWidget {
   @override
@@ -136,7 +137,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
         children: [
           if (selectedSubTool == 3)
             ColorFloatingBar(
@@ -154,6 +154,17 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 ).show();
               },
             ),
+          if (selectedSubTool == 2)
+            FontsFab(
+              onSelect: (font) {
+                setState(() {
+                  if (selectedTextKey != null &&
+                      selectedTextKey!.currentState != null) {
+                    selectedTextKey!.currentState!.setFontFamily(font);
+                  }
+                });
+              },
+            ),
           SizedBox(height: 5),
 
           Row(
@@ -161,15 +172,24 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (selectedTool != -1)
-                JournalSubFAB(
-                  selectedTool: selectedTool,
-                  selectedSubTool: selectedSubTool,
-                  onToolSelected: (selected) {
-                    setState(() {
-                      selectedSubTool = selected;
-                    });
-                  },
-                  selectedTextKey: selectedTextKey,
+                UnconstrainedBox(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      child: JournalSubFAB(
+                        selectedTool: selectedTool,
+                        selectedSubTool: selectedSubTool,
+                        onToolSelected: (selected) {
+                          setState(() {
+                            selectedSubTool = selected;
+                          });
+                        },
+                        selectedTextKey: selectedTextKey,
+                      ),
+                    ),
+                  ),
                 ),
 
               const SizedBox(width: 15),

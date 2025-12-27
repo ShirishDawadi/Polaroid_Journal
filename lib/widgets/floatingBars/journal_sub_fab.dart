@@ -51,7 +51,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             onPressed: textState.toggleBold,
           ),
           const SizedBox(width: 15),
-
+      
           DecoratedIconButton(
             icon: textState.isItalic
                 ? Icons.format_italic
@@ -59,7 +59,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             onPressed: textState.toggleItalic,
           ),
           const SizedBox(width: 15),
-
+      
           DecoratedIconButton(
             icon: textState.isUnderline
                 ? Icons.format_underlined
@@ -67,7 +67,13 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             onPressed: textState.toggleUnderline,
           ),
           const SizedBox(width: 15),
-
+      
+          DecoratedIconButton(
+            icon: Icons.font_download_rounded,
+            onPressed: () => widget.onToolSelected(2),
+          ),
+          const SizedBox(width: 15),
+      
           DecoratedIconButton(
             icon: textState.textAlign == TextAlign.left
                 ? Icons.align_horizontal_left
@@ -87,7 +93,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             },
           ),
           const SizedBox(width: 15),
-
+      
           DecoratedIconButton(
             icon: Icons.format_color_text,
             color: textState.textColor,

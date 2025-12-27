@@ -23,3 +23,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: KrabbyPatty
+      fonts:
+        - asset: assets/fonts/KrabbyPatty.ttf
+

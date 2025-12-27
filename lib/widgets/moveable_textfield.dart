@@ -20,13 +20,16 @@ class MovableTextField extends StatefulWidget {
 class MovableTextFieldState extends State<MovableTextField> {
   double x = 0, y = 0;
   double scale = 1.0, rotation = 0.0;
-  double origX = 0, origY = 0;
-  double origScale = 1.0, origRotation = 0.0;
+
   double baseScale = 1.0;
   double baseRotation = 0.0;
 
+  double focusedX = 0, focusedY = 0;
+  double focusedScale = 1.0, focusedRotation = 0.0;
+
   final controller = TextEditingController();
   final focus = FocusNode();
+  bool isFocused = false;
 
   bool isBold = false;
   bool isItalic = false;
@@ -35,19 +38,15 @@ class MovableTextFieldState extends State<MovableTextField> {
   TextAlign textAlign = TextAlign.center;
   String fontFamily = 'Roboto';
 
-  bool get isFocused => focus.hasFocus;
-
-  @override
+  @override 
   void initState() {
     super.initState();
 
-    x = 0;
-    y = MediaQuery.of(widget.context).size.height / 3;
+    final screen = MediaQuery.of(widget.context).size;
+    final kbHeight = MediaQuery.of(widget.context).viewInsets.bottom;
 
-    origX = x;
-    origY = y;
-    origScale = scale;
-    origRotation = rotation;
+    y = (screen.height - kbHeight) * 0.30;
+    focusedY = y;
 
     focus.requestFocus();
     focus.addListener(_handleFocusChange);
@@ -56,34 +55,14 @@ class MovableTextFieldState extends State<MovableTextField> {
   void _handleFocusChange() {
     if (!mounted) return;
 
-    widget.onFocusChanged?.call(widget.key!, focus.hasFocus);
+    setState(() {
+      isFocused = focus.hasFocus;
+    });
 
-    if (focus.hasFocus) {
-      origX = x;
-      origY = y;
-      origScale = scale;
-      origRotation = rotation;
+    widget.onFocusChanged?.call(widget.key!, isFocused);
 
-      final screen = MediaQuery.of(context).size;
-      final kbHeight = MediaQuery.of(context).viewInsets.bottom;
-
-      setState(() {
-        x = -10;
-        y = (screen.height - kbHeight) * 0.30;
-        scale = 1.0;
-        rotation = 0.0;
-      });
-    } else {
-      setState(() {
-        x = origX;
-        y = origY;
-        scale = origScale;
-        rotation = origRotation;
-      });
-
-      if (controller.text.trim().isEmpty) {
-        widget.onRemove(widget.key!);
-      }
+    if (!isFocused && controller.text.trim().isEmpty) {
+      widget.onRemove(widget.key!);
     }
   }
 
@@ -144,19 +123,19 @@ class MovableTextFieldState extends State<MovableTextField> {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: x,
-      top: y,
+      left: (isFocused) ? focusedX : x,
+      top: (isFocused) ? focusedY : y,
       child: Transform.rotate(
-        angle: rotation,
+        angle: (isFocused) ? focusedRotation : rotation,
         child: Transform.scale(
-          scale: scale,
+          scale: (isFocused) ? focusedScale : scale,
           child: GestureDetector(
             onScaleStart: (details) {
               baseScale = scale;
               baseRotation = rotation;
             },
             onScaleUpdate: (details) {
-              if (!focus.hasFocus) {
+              if (!isFocused) {
                 setState(() {
                   scale = baseScale * details.scale;
                   rotation = baseRotation + details.rotation;
@@ -171,11 +150,6 @@ class MovableTextFieldState extends State<MovableTextField> {
 
                   x += (dx * cos - dy * sin) * scale;
                   y += (dx * sin + dy * cos) * scale;
-
-                  origX = x;
-                  origY = y;
-                  origScale = scale;
-                  origRotation = rotation;
                 });
               }
             },
@@ -185,18 +159,23 @@ class MovableTextFieldState extends State<MovableTextField> {
                   minWidth: 75,
                   maxWidth: MediaQuery.of(context).size.width,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focus,
-                    textAlign: textAlign,
-                    style: textStyle,
-                    cursorColor: textColor,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
+                child: SizedBox(
+                  width: isFocused
+                      ? MediaQuery.of(context).size.width
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: TextField(
+                      controller: controller,
+                      focusNode: focus,
+                      textAlign: textAlign,
+                      style: textStyle,
+                      cursorColor: textColor,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      maxLines: null,
                     ),
-                    maxLines: null,
                   ),
                 ),
               ),

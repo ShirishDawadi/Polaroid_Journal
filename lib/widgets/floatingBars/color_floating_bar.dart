@@ -6,6 +6,7 @@ class ColorFloatingBar extends StatelessWidget {
   final Color selectedColor;
 
   ColorFloatingBar({
+    super.key,
     required this.selectedColor,
     required this.onSelect,
     required this.onOpenColorPicker,
