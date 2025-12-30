@@ -5,7 +5,7 @@ class FontsFab extends StatelessWidget {
 
   FontsFab({super.key, required this.onSelect});
 
-  final List<String> fonts = ['Roboto', 'KrabbyPatty'];
+  final List<String> fonts = ['Roboto', 'KrabbyPatty', 'Gristela', 'AbrilFatface'];
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +23,8 @@ class FontsFab extends StatelessWidget {
                 (font) => GestureDetector(
                   onTap: () => onSelect(font),
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 6),
                     padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black12),
-                    ),
-                    child: Text(font, style: TextStyle(fontFamily: font)),
+                    child: Text(font, style: TextStyle(fontFamily: font, fontSize:18,)),
                   ),
                 ),
               ),

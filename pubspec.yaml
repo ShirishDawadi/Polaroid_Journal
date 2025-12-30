@@ -27,4 +27,10 @@ flutter:
     - family: KrabbyPatty
       fonts:
         - asset: assets/fonts/KrabbyPatty.ttf
+    - family: Gristela
+      fonts:
+        - asset: assets/fonts/gristela.otf
+    - family: AbrilFatface
+      fonts:
+        - asset: assets/fonts/AbrilFatface-Regular.ttf
 

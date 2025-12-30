@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class DecoratedIconButton extends StatelessWidget {
   final IconData icon;
   final Color? color;
@@ -15,7 +14,8 @@ class DecoratedIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: 
+      BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
         border: Border.all(color: Theme.of(context).primaryColor),
