@@ -132,6 +132,20 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               ),
             ),
           ),
+          
+          if (isOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isOpen = false;
+                  });
+                },
+                child: Container(
+                  color: Colors.black.withValues(alpha:0.6),
+                ),
+              ),
+            ),
         ],
       ),
       floatingActionButton: Column(
@@ -139,44 +153,52 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (selectedSubTool == 3)
-            ColorFloatingBar(
-              selectedColor: currentColor,
-              onSelect: (color) {
-                setState(() => changeColor(color));
-              },
-              onOpenColorPicker: () {
-                ColorPickerOverlay(
-                  context: context,
-                  initialColor: currentColor,
-                  onSelect: (picked) {
-                    setState(() => changeColor(picked));
-                  },
-                ).show();
-              },
+            IgnorePointer(
+              ignoring: isOpen,
+              child: ColorFloatingBar(
+                selectedColor: currentColor,
+                onSelect: (color) {
+                  setState(() => changeColor(color));
+                },
+                onOpenColorPicker: () {
+                  ColorPickerOverlay(
+                    context: context,
+                    initialColor: currentColor,
+                    onSelect: (picked) {
+                      setState(() => changeColor(picked));
+                    },
+                  ).show();
+                },
+              ),
             ),
           if (selectedSubTool == 2)
-            FontsFab(
-              onSelect: (font) {
-                setState(() {
-                  if (selectedTextKey != null &&
-                      selectedTextKey!.currentState != null) {
-                    selectedTextKey!.currentState!.setFontFamily(font);
-                  }
-                });
-              },
+            IgnorePointer(
+              ignoring: isOpen,
+              child: FontsFab(
+                onSelect: (font) {
+                  setState(() {
+                    if (selectedTextKey != null &&
+                        selectedTextKey!.currentState != null) {
+                      selectedTextKey!.currentState!.setFontFamily(font);
+                    }
+                  });
+                },
+              ),
             ),
           SizedBox(height: 5),
-
+      
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (selectedTool != -1)
-                UnconstrainedBox(
+                IgnorePointer(
+                  ignoring: isOpen,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
                       reverse: true,
                       child: JournalSubFAB(
                         selectedTool: selectedTool,
@@ -191,9 +213,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     ),
                   ),
                 ),
-
+      
               const SizedBox(width: 15),
-
+      
               JournalFloatingBar(
                 isOpen: isOpen,
                 selectedTool: selectedTool,
@@ -210,9 +232,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     if (selectedTool == 2) currentColor = currentTextColor;
                     if (selectedTool == 3) currentColor = currentBackgroundColor;
                   });
-
+      
                   if (tool == 0) await pickImage();
-
+      
                   if (tool == 2) addTextField();
                 },
                 onToggle: () {

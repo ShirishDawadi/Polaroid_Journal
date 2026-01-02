@@ -18,7 +18,6 @@ class DecoratedIconButton extends StatelessWidget {
       BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: Theme.of(context).primaryColor),
         boxShadow: const [
           BoxShadow(color: Colors.black26, blurRadius: 10),
         ],
