@@ -27,10 +27,22 @@ flutter:
     - family: KrabbyPatty
       fonts:
         - asset: assets/fonts/KrabbyPatty.ttf
-    - family: Gristela
-      fonts:
-        - asset: assets/fonts/gristela.otf
     - family: AbrilFatface
       fonts:
-        - asset: assets/fonts/AbrilFatface-Regular.ttf
+        - asset: assets/fonts/AbrilFatface.ttf
+    - family: Akira
+      fonts:
+        - asset: assets/fonts/AkiraExpanded.otf
+    - family: AppleGaramond
+      fonts:
+        - asset: assets/fonts/AppleGaramond.ttf
+    - family: Moonlight
+      fonts:
+        - asset: assets/fonts/Moonlight.otf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans.ttf
+    - family: Sekuya
+      fonts:
+        - asset: assets/fonts/Sekuya.ttf
 

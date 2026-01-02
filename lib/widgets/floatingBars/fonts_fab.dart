@@ -5,7 +5,16 @@ class FontsFab extends StatelessWidget {
 
   FontsFab({super.key, required this.onSelect});
 
-  final List<String> fonts = ['Roboto', 'KrabbyPatty', 'Gristela', 'AbrilFatface'];
+  final List<String> fonts = [
+    'Roboto',
+    'KrabbyPatty',
+    'AbrilFatface',
+    'Akira',
+    'AppleGaramond',
+    'Moonlight',
+    'OpenSans',
+    'Sekuya',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +33,10 @@ class FontsFab extends StatelessWidget {
                   onTap: () => onSelect(font),
                   child: Container(
                     padding: EdgeInsets.all(10),
-                    child: Text(font, style: TextStyle(fontFamily: font, fontSize:18,)),
+                    child: Text(
+                      font,
+                      style: TextStyle(fontFamily: font, fontSize: 18),
+                    ),
                   ),
                 ),
               ),
