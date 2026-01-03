@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_painting_tools/flutter_painting_tools.dart'
-    show PaintingBoard, PaintingBoardController;
+// import 'package:flutter_painting_tools/flutter_painting_tools.dart'
+//     show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
+import 'package:polaroid_journal/utils/tools_enum.dart';
 import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
 import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
@@ -10,6 +11,7 @@ import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart'
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
+import 'package:whiteboard/whiteboard.dart';
 
 class JournalEntryScreen extends StatefulWidget {
   @override
@@ -22,11 +24,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color currentBrushColor = Colors.black;
   Color currentColor = Colors.black;
   bool isIgnoring = true;
-  late final PaintingBoardController controller;
+
+  late final WhiteBoardController controller;
+  bool isErasing = false;
 
   bool isOpen = false;
-  int selectedTool = -1;
-  int selectedSubTool = -1;
+  Tool? selectedTool;
+  SubTool? selectedSubTool;
   List<GlobalKey<MovableTextFieldState>> textKeys = [];
   List<MovableTextField> texts = [];
   GlobalKey<MovableTextFieldState>? selectedTextKey;
@@ -76,26 +80,26 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   void changeColor(Color color) {
-    if (selectedTool == 1) {
-      controller.changeBrushColor(color);
+    if (selectedTool == Tool.draw) {
+      // controller.changeBrushColor(color);
       currentBrushColor = color;
     }
 
-    if (selectedTool == 2) {
+    if (selectedTool == Tool.text) {
       currentTextColor = color;
       if (selectedTextKey != null && selectedTextKey!.currentState != null) {
         selectedTextKey!.currentState!.setTextColor(color);
       }
     }
 
-    if (selectedTool == 3) currentBackgroundColor = color;
+    if (selectedTool == Tool.background) currentBackgroundColor = color;
 
     currentColor = color;
   }
 
   @override
   void initState() {
-    controller = PaintingBoardController();
+    controller = WhiteBoardController();
     super.initState();
   }
 
@@ -122,8 +126,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   IgnorePointer(
                     ignoring: isIgnoring,
                     child: Positioned.fill(
-                      child: PaintingBoard(
-                        boardBackgroundColor: Colors.transparent,
+                      child: WhiteBoard(
+                        backgroundColor: Colors.transparent,
+                        strokeColor: currentBrushColor,
+                        strokeWidth: 10,
+                        isErasing: isErasing,
                         controller: controller,
                       ),
                     ),
@@ -132,7 +139,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               ),
             ),
           ),
-          
+
           if (isOpen)
             Positioned.fill(
               child: GestureDetector(
@@ -141,9 +148,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     isOpen = false;
                   });
                 },
-                child: Container(
-                  color: Colors.black.withValues(alpha:0.6),
-                ),
+                child: Container(color: Colors.black.withValues(alpha: 0.6)),
               ),
             ),
         ],
@@ -152,7 +157,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (selectedSubTool == 3)
+          if (selectedSubTool == SubTool.color)
             IgnorePointer(
               ignoring: isOpen,
               child: ColorFloatingBar(
@@ -171,7 +176,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 },
               ),
             ),
-          if (selectedSubTool == 2)
+          if (selectedSubTool == SubTool.font)
             IgnorePointer(
               ignoring: isOpen,
               child: FontsFab(
@@ -186,12 +191,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               ),
             ),
           SizedBox(height: 5),
-      
+
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (selectedTool != -1)
+              if (selectedTool != null)
                 IgnorePointer(
                   ignoring: isOpen,
                   child: SizedBox(
@@ -206,16 +211,19 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         onToolSelected: (selected) {
                           setState(() {
                             selectedSubTool = selected;
+                            if(selectedSubTool == SubTool.erase) isErasing = !isErasing;
                           });
                         },
                         selectedTextKey: selectedTextKey,
+                        whiteBoardController: controller,
+                        currentBrushColor: currentBrushColor,
                       ),
                     ),
                   ),
                 ),
-      
+
               const SizedBox(width: 15),
-      
+
               JournalFloatingBar(
                 isOpen: isOpen,
                 selectedTool: selectedTool,
@@ -223,23 +231,23 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   setState(() {
                     isOpen = false;
                     selectedTool = tool;
-                    if (selectedTool == 1) {
+                    if (selectedTool == Tool.draw) {
                       isIgnoring = false;
                       currentColor = currentBrushColor;
                     } else {
                       isIgnoring = true;
                     }
-                    if (selectedTool == 2) currentColor = currentTextColor;
-                    if (selectedTool == 3) currentColor = currentBackgroundColor;
+                    if (selectedTool == Tool.text) currentColor = currentTextColor;
+                    if (selectedTool == Tool.background) currentColor = currentBackgroundColor;
                   });
-      
-                  if (tool == 0) await pickImage();
-      
-                  if (tool == 2) addTextField();
+
+                  if (tool == Tool.image) await pickImage();
+
+                  if (tool == Tool.text) addTextField();
                 },
                 onToggle: () {
                   setState(() {
-                    selectedSubTool = -1;
+                    selectedSubTool = null;
                     isOpen = !isOpen;
                   });
                 },

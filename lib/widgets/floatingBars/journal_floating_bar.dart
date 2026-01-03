@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/utils/tools_enum.dart';
 
 class JournalFloatingBar extends StatelessWidget {
   final bool isOpen;
-  final int selectedTool;
+  final Tool? selectedTool;
 
-  final Function(int) onToolSelected;
+  final Function(Tool) onToolSelected;
   final Function() onToggle;
 
   const JournalFloatingBar({
@@ -37,35 +38,35 @@ class JournalFloatingBar extends StatelessWidget {
                   ? [
                       IconButton(
                         icon: Icon(
-                          selectedTool == 0
+                          selectedTool == Tool.image
                               ? Icons.photo_library
                               : Icons.photo_library_outlined,
                         ),
-                        onPressed: () => onToolSelected(0),
+                        onPressed: () => onToolSelected(Tool.image),
                       ),
                       IconButton(
                         icon: Icon(
-                          selectedTool == 1
+                          selectedTool == Tool.draw
                               ? Icons.brush
                               : Icons.brush_outlined,
                         ),
-                        onPressed: () => onToolSelected(1),
+                        onPressed: () => onToolSelected(Tool.draw),
                       ),
                       IconButton(
                         icon: Icon(
-                          selectedTool == 2
+                          selectedTool == Tool.text
                               ? Icons.text_fields
                               : Icons.text_fields_outlined,
                         ),
-                        onPressed: () => onToolSelected(2),
+                        onPressed: () => onToolSelected(Tool.text),
                       ),
                       IconButton(
                         icon: Icon(
-                          selectedTool == 3
+                          selectedTool == Tool.background
                               ? Icons.format_paint
                               : Icons.format_paint_outlined,
                         ),
-                        onPressed: () => onToolSelected(3),
+                        onPressed: () => onToolSelected(Tool.background),
                       ),
                     ]
                   : [],
