@@ -1,6 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 class DecoratedIconButton extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final Color? color;
   final VoidCallback onPressed;
 
@@ -13,19 +15,23 @@ class DecoratedIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: 
-      BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 10),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon),
-        color: color,
-        onPressed: onPressed,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(40),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          decoration: 
+          BoxDecoration(
+            color: Theme.of(context).colorScheme.surface.withValues(alpha:0.3),
+            // color: Theme.of(context).primaryColor.withAlpha(2),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: IconButton(
+            icon: icon,
+            color: color,
+            onPressed: onPressed,
+          ),
+        ),
       ),
     );
   }

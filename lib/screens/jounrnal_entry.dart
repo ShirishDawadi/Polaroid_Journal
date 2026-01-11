@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:flutter_painting_tools/flutter_painting_tools.dart'
-//     show PaintingBoard, PaintingBoardController;
 import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/utils/tools_enum.dart';
 import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
@@ -114,7 +112,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               FocusScope.of(context).unfocus();
             },
             child: Container(
-              margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
+              margin: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: currentBackgroundColor,
                 border: Border.all(color: Colors.brown, width: 2),

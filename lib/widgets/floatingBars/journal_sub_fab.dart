@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/utils/app_assets.dart';
 import 'package:polaroid_journal/utils/tools_enum.dart';
 import 'package:polaroid_journal/widgets/decorated_icon_button.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
+import 'package:polaroid_journal/widgets/svg_widget.dart';
 import 'package:whiteboard/whiteboard.dart';
 
 class JournalSubFAB extends StatefulWidget {
@@ -10,7 +12,7 @@ class JournalSubFAB extends StatefulWidget {
   final Function(SubTool) onToolSelected;
 
   final GlobalKey<MovableTextFieldState>? selectedTextKey;
-  
+
   final WhiteBoardController? whiteBoardController;
   final Color? currentBrushColor;
 
@@ -29,6 +31,8 @@ class JournalSubFAB extends StatefulWidget {
 }
 
 class _JournalSubFABState extends State<JournalSubFAB> {
+  bool isErasing = false;
+
   @override
   Widget build(BuildContext context) {
     if (widget.selectedTool == Tool.text) {
@@ -53,43 +57,60 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
-            icon: Icons.format_bold,
-            onPressed:(){ 
+            icon: AppSvg.icon(
+              context: context,
+              path: (textState.isBold) ? AppAssets.boldFilled : AppAssets.bold,
+            ),
+            onPressed: () {
               widget.onToolSelected(SubTool.bold);
-              textState.toggleBold;
-              }
+              setState(() => textState.toggleBold());
+            },
           ),
           const SizedBox(width: 15),
-      
+
           DecoratedIconButton(
-            icon: Icons.format_italic,
-            onPressed:(){ 
+            icon: AppSvg.icon(
+              context: context,
+              path: (textState.isItalic)
+                  ? AppAssets.italicFilled
+                  : AppAssets.italic,
+            ),
+            onPressed: () {
               widget.onToolSelected(SubTool.italic);
-              textState.toggleItalic;}
+              setState(() => textState.toggleItalic());
+            },
           ),
           const SizedBox(width: 15),
-      
+
           DecoratedIconButton(
-            icon: Icons.format_underlined,
-            onPressed:(){ 
+            icon: AppSvg.icon(
+              context: context,
+              path: (textState.isUnderline)
+                  ? AppAssets.underlineFilled
+                  : AppAssets.underline,
+            ),
+            onPressed: () {
               widget.onToolSelected(SubTool.underline);
-              textState.toggleUnderline();
-              }
+              setState(() => textState.toggleUnderline());
+            },
           ),
           const SizedBox(width: 15),
-      
+
           DecoratedIconButton(
-            icon: Icons.font_download_rounded,
+            icon: AppSvg.icon(context: context, path: AppAssets.font),
             onPressed: () => widget.onToolSelected(SubTool.font),
           ),
           const SizedBox(width: 15),
-      
+
           DecoratedIconButton(
-            icon: textState.textAlign == TextAlign.left
-                ? Icons.align_horizontal_left
-                : textState.textAlign == TextAlign.right
-                ? Icons.align_horizontal_right
-                : Icons.align_horizontal_center,
+            icon: AppSvg.icon(
+              context: context,
+              path: (textState.textAlign == TextAlign.left)
+                  ? AppAssets.leftAlign
+                  : (textState.textAlign == TextAlign.right)
+                  ? AppAssets.rightAlign
+                  : AppAssets.centerAlign,
+            ),
             onPressed: () {
               setState(() {
                 widget.onToolSelected(SubTool.align);
@@ -104,33 +125,22 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             },
           ),
           const SizedBox(width: 15),
-      
+
           DecoratedIconButton(
-            icon: Icons.format_color_text,
-            color: textState.textColor,
+            icon: Icon(Icons.format_color_text, color: textState.textColor),
             onPressed: () => widget.onToolSelected(SubTool.color),
           ),
         ],
       );
     }
 
-
     if (widget.selectedTool == Tool.draw) {
-
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
-            icon: Icons.redo_rounded,
-            onPressed:() { 
-              widget.onToolSelected(SubTool.redo);
-              widget.whiteBoardController?.redo();}
-          ),
-          const SizedBox(width: 15),
-
-          DecoratedIconButton(
-            icon: Icons.undo,
-            onPressed:() {
+            icon: AppSvg.icon(context: context, path: AppAssets.undo),
+            onPressed: () {
               widget.onToolSelected(SubTool.undo);
               widget.whiteBoardController?.undo();
             },
@@ -138,8 +148,17 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: Icons.delete,
-            onPressed:() {
+            icon: AppSvg.icon(context: context, path: AppAssets.redo),
+            onPressed: () {
+              widget.onToolSelected(SubTool.redo);
+              widget.whiteBoardController?.redo();
+            },
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.delete),
+            onPressed: () {
               widget.onToolSelected(SubTool.delete);
               widget.whiteBoardController?.clear();
             },
@@ -147,13 +166,20 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: Icons.bubble_chart_outlined,
-            onPressed:() => widget.onToolSelected(SubTool.erase),
+            icon: AppSvg.icon(
+              context: context,
+              path: isErasing ? AppAssets.eraserFilled : AppAssets.eraser,
+            ),
+            onPressed: () {
+              widget.onToolSelected(SubTool.erase);
+              setState(() => isErasing = !isErasing);
+            },
           ),
+
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: Icons.circle_rounded,
+            icon: Icon(Icons.circle_rounded),
             color: widget.currentBrushColor,
             onPressed: () => widget.onToolSelected(SubTool.color),
           ),
@@ -166,8 +192,8 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         for (int i = 0; i < 4; i++) ...[
           DecoratedIconButton(
             icon: widget.selectedSubTool == i
-                ? Icons.circle
-                : Icons.circle_outlined,
+                ? Icon(Icons.circle)
+                : Icon(Icons.circle_outlined),
             onPressed: () => widget.onToolSelected(SubTool.color),
           ),
           const SizedBox(width: 15),

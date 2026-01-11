@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/utils/app_assets.dart';
 import 'package:polaroid_journal/utils/tools_enum.dart';
+import 'package:polaroid_journal/widgets/svg_widget.dart';
 
 class JournalFloatingBar extends StatelessWidget {
   final bool isOpen;
@@ -22,9 +24,7 @@ class JournalFloatingBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 10),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -37,34 +37,36 @@ class JournalFloatingBar extends StatelessWidget {
               children: isOpen
                   ? [
                       IconButton(
-                        icon: Icon(
-                          selectedTool == Tool.image
-                              ? Icons.photo_library
-                              : Icons.photo_library_outlined,
+                        icon: AppSvg.icon(
+                          context: context,
+                          path: selectedTool == Tool.image
+                              ? AppAssets.imageFilled
+                              : AppAssets.image,
                         ),
                         onPressed: () => onToolSelected(Tool.image),
                       ),
                       IconButton(
-                        icon: Icon(
-                          selectedTool == Tool.draw
-                              ? Icons.brush
-                              : Icons.brush_outlined,
+                        icon: AppSvg.icon(
+                          context: context,
+                          path: selectedTool == Tool.draw
+                              ? AppAssets.brushFilled
+                              : AppAssets.brush,
                         ),
                         onPressed: () => onToolSelected(Tool.draw),
                       ),
                       IconButton(
-                        icon: Icon(
-                          selectedTool == Tool.text
-                              ? Icons.text_fields
-                              : Icons.text_fields_outlined,
+                        icon: AppSvg.icon(
+                          context: context,
+                          path: selectedTool == Tool.text
+                              ? AppAssets.textFilled
+                              : AppAssets.text,
                         ),
                         onPressed: () => onToolSelected(Tool.text),
                       ),
                       IconButton(
-                        icon: Icon(
-                          selectedTool == Tool.background
-                              ? Icons.format_paint
-                              : Icons.format_paint_outlined,
+                        icon: AppSvg.icon(
+                          context: context,
+                          path: AppAssets.background,
                         ),
                         onPressed: () => onToolSelected(Tool.background),
                       ),
