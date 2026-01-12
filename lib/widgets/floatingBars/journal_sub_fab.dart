@@ -16,6 +16,9 @@ class JournalSubFAB extends StatefulWidget {
   final WhiteBoardController? whiteBoardController;
   final Color? currentBrushColor;
 
+  final Color? primaryBackgroundColor;
+  final Color? secondaryBackgroundColor;
+
   const JournalSubFAB({
     super.key,
     required this.selectedTool,
@@ -24,6 +27,8 @@ class JournalSubFAB extends StatefulWidget {
     this.selectedTextKey,
     this.whiteBoardController,
     this.currentBrushColor,
+    this.primaryBackgroundColor,
+    this.secondaryBackgroundColor,
   });
 
   @override
@@ -182,6 +187,48 @@ class _JournalSubFABState extends State<JournalSubFAB> {
             icon: Icon(Icons.circle_rounded),
             color: widget.currentBrushColor,
             onPressed: () => widget.onToolSelected(SubTool.color),
+          ),
+        ],
+      );
+    }
+
+    if (widget.selectedTool == Tool.background) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.paper),
+            onPressed: () {
+              widget.onToolSelected(SubTool.paper);
+            },
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.wallpaper),
+            onPressed: () {
+              widget.onToolSelected(SubTool.wallpaper);
+            },
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
+            icon: (widget.primaryBackgroundColor != null)
+                ? Icon(Icons.circle_rounded)
+                : Icon(Icons.close),
+            color: widget.primaryBackgroundColor,
+            onPressed: () =>
+                widget.onToolSelected(SubTool.primaryBackgroundColor),
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
+            icon: (widget.secondaryBackgroundColor != null)
+                ? Icon(Icons.circle_rounded)
+                : Icon(Icons.close),
+            color: widget.secondaryBackgroundColor,
+            onPressed: () =>
+                widget.onToolSelected(SubTool.secondaryBackgroundColor),
           ),
         ],
       );

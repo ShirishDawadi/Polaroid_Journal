@@ -78,7 +78,7 @@ class JournalFloatingBar extends StatelessWidget {
             duration: const Duration(milliseconds: 300),
             turns: isOpen ? 0.25 : 0.75,
             child: IconButton(
-              iconSize: 10,
+              iconSize: 20,
               icon: const Icon(Icons.arrow_forward_ios_rounded),
               onPressed: onToggle,
             ),

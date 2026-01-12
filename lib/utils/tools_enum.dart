@@ -8,7 +8,6 @@ enum Tool {
 enum SubTool {
   //common
   color,
-  backgroundColor,
 
   //text
   bold,
@@ -22,4 +21,10 @@ enum SubTool {
   redo,
   delete,
   erase,
+
+  //background
+  wallpaper,
+  paper,
+  primaryBackgroundColor,
+  secondaryBackgroundColor,
 }

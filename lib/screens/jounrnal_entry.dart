@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,6 +8,7 @@ import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
 import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
+import 'package:polaroid_journal/widgets/journal_background.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
@@ -17,10 +20,12 @@ class JournalEntryScreen extends StatefulWidget {
 }
 
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
-  Color currentBackgroundColor = Colors.white;
+  Color? primaryBackgroundColor = Colors.white;
+  Color? secondaryBackgroundColor;
+
   Color currentTextColor = Colors.black;
   Color currentBrushColor = Colors.black;
-  Color currentColor = Colors.black;
+  Color? currentColor = Colors.black;
   bool isIgnoring = true;
 
   late final WhiteBoardController controller;
@@ -77,20 +82,26 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     });
   }
 
-  void changeColor(Color color) {
-    if (selectedTool == Tool.draw) {
-      // controller.changeBrushColor(color);
-      currentBrushColor = color;
-    }
+  void changeColor(Color? color) {
+    if (color != null) {
+      if (selectedTool == Tool.draw) {
+        currentBrushColor = color;
+      }
 
-    if (selectedTool == Tool.text) {
-      currentTextColor = color;
-      if (selectedTextKey != null && selectedTextKey!.currentState != null) {
-        selectedTextKey!.currentState!.setTextColor(color);
+      if (selectedTool == Tool.text) {
+        currentTextColor = color;
+        if (selectedTextKey != null && selectedTextKey!.currentState != null) {
+          selectedTextKey!.currentState!.setTextColor(color);
+        }
       }
     }
-
-    if (selectedTool == Tool.background) currentBackgroundColor = color;
+    if (selectedTool == Tool.background) {
+      if (selectedSubTool == SubTool.secondaryBackgroundColor) {
+        secondaryBackgroundColor = color;
+      } else {
+        primaryBackgroundColor = color;
+      }
+    }
 
     currentColor = color;
   }
@@ -114,11 +125,18 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             child: Container(
               margin: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: currentBackgroundColor,
                 border: Border.all(color: Colors.brown, width: 2),
               ),
               child: Stack(
                 children: [
+                  JournalBackground(
+                    primaryBackgroundColor: primaryBackgroundColor,
+                    secondaryBackgroundColor: secondaryBackgroundColor,
+                    // image: currentBackgroundImage,
+                    // imageOpacity: currentImageOpacity,
+                    // imageBlur: currentImageBlur,
+                  ),
+
                   ...photos,
                   ...texts,
                   IgnorePointer(
@@ -155,18 +173,21 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (selectedSubTool == SubTool.color)
+          if (selectedSubTool == SubTool.color ||
+              selectedSubTool == SubTool.secondaryBackgroundColor ||
+              selectedSubTool == SubTool.primaryBackgroundColor)
             IgnorePointer(
               ignoring: isOpen,
               child: ColorFloatingBar(
                 selectedColor: currentColor,
+                tool: selectedTool,
                 onSelect: (color) {
                   setState(() => changeColor(color));
                 },
                 onOpenColorPicker: () {
                   ColorPickerOverlay(
                     context: context,
-                    initialColor: currentColor,
+                    initialColor: currentColor!,
                     onSelect: (picked) {
                       setState(() => changeColor(picked));
                     },
@@ -199,22 +220,36 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   ignoring: isOpen,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      clipBehavior: Clip.none,
-                      reverse: true,
-                      child: JournalSubFAB(
-                        selectedTool: selectedTool,
-                        selectedSubTool: selectedSubTool,
-                        onToolSelected: (selected) {
-                          setState(() {
-                            selectedSubTool = selected;
-                            if(selectedSubTool == SubTool.erase) isErasing = !isErasing;
-                          });
-                        },
-                        selectedTextKey: selectedTextKey,
-                        whiteBoardController: controller,
-                        currentBrushColor: currentBrushColor,
+                    child: ScrollConfiguration(
+                      behavior: const ScrollBehavior().copyWith(
+                        overscroll: false,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        clipBehavior: Clip.none,
+                        reverse: true,
+                        child: JournalSubFAB(
+                          selectedTool: selectedTool,
+                          selectedSubTool: selectedSubTool,
+                          onToolSelected: (selected) {
+                            setState(() {
+                              selectedSubTool = selected;
+                              if (selectedSubTool == SubTool.erase)
+                                isErasing = !isErasing;
+                              if (selectedSubTool ==
+                                  SubTool.secondaryBackgroundColor)
+                                currentColor = secondaryBackgroundColor;
+                              if (selectedSubTool ==
+                                  SubTool.primaryBackgroundColor)
+                                currentColor = primaryBackgroundColor;
+                            });
+                          },
+                          selectedTextKey: selectedTextKey,
+                          whiteBoardController: controller,
+                          currentBrushColor: currentBrushColor,
+                          primaryBackgroundColor: primaryBackgroundColor,
+                          secondaryBackgroundColor: secondaryBackgroundColor,
+                        ),
                       ),
                     ),
                   ),
@@ -235,8 +270,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     } else {
                       isIgnoring = true;
                     }
-                    if (selectedTool == Tool.text) currentColor = currentTextColor;
-                    if (selectedTool == Tool.background) currentColor = currentBackgroundColor;
+                    if (selectedTool == Tool.text)
+                      currentColor = currentTextColor;
+                    if (selectedTool == Tool.background) {
+                      currentColor = primaryBackgroundColor;
+                    }
                   });
 
                   if (tool == Tool.image) await pickImage();

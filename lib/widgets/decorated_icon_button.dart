@@ -23,7 +23,6 @@ class DecoratedIconButton extends StatelessWidget {
           decoration: 
           BoxDecoration(
             color: Theme.of(context).colorScheme.surface.withValues(alpha:0.3),
-            // color: Theme.of(context).primaryColor.withAlpha(2),
             borderRadius: BorderRadius.circular(40),
           ),
           child: IconButton(
