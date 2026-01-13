@@ -21,6 +21,7 @@ enum SubTool {
   redo,
   delete,
   erase,
+  thickness,
 
   //background
   wallpaper,

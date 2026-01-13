@@ -72,7 +72,7 @@ class ColorFloatingBar extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Theme.of(context).colorScheme.surface,
                       border: Border.all(
-                        color: Theme.of(context).primaryColor,
+                        color: Colors.black,
                         width: selectedColor == null ? 3 : 1,
                       ),
                     ),

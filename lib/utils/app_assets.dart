@@ -13,6 +13,7 @@ class AppAssets {
   static const delete = '$baseIcon/delete.svg';
   static const eraser = '$baseIcon/eraser.svg';
   static const eraserFilled = '$baseIcon/eraser-filled.svg';
+  static const thickness = '$baseIcon/thickness.svg';
 
   //text
   static const text = '$baseIcon/text.svg';

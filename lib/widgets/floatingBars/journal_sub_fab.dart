@@ -144,6 +144,15 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.delete),
+            onPressed: () {
+              widget.onToolSelected(SubTool.delete);
+              widget.whiteBoardController?.clear();
+            },
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.undo),
             onPressed: () {
               widget.onToolSelected(SubTool.undo);
@@ -162,15 +171,6 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: AppSvg.icon(context: context, path: AppAssets.delete),
-            onPressed: () {
-              widget.onToolSelected(SubTool.delete);
-              widget.whiteBoardController?.clear();
-            },
-          ),
-          const SizedBox(width: 15),
-
-          DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
               path: isErasing ? AppAssets.eraserFilled : AppAssets.eraser,
@@ -180,7 +180,17 @@ class _JournalSubFABState extends State<JournalSubFAB> {
               setState(() => isErasing = !isErasing);
             },
           ),
+          const SizedBox(width: 15),
 
+           DecoratedIconButton(
+            icon: AppSvg.icon(
+              context: context,
+              path:AppAssets.thickness,
+            ),
+            onPressed: () {
+              widget.onToolSelected(SubTool.thickness);
+            },
+          ),
           const SizedBox(width: 15),
 
           DecoratedIconButton(

@@ -8,6 +8,7 @@ import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
 import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
+import 'package:polaroid_journal/widgets/floatingBars/stroke_width_fab.dart';
 import 'package:polaroid_journal/widgets/journal_background.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
@@ -22,6 +23,7 @@ class JournalEntryScreen extends StatefulWidget {
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color? primaryBackgroundColor = Colors.white;
   Color? secondaryBackgroundColor;
+  File? currentBackgroundImage;
 
   Color currentTextColor = Colors.black;
   Color currentBrushColor = Colors.black;
@@ -30,6 +32,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   late final WhiteBoardController controller;
   bool isErasing = false;
+  double strokeWidth = 3;
 
   bool isOpen = false;
   Tool? selectedTool;
@@ -40,14 +43,26 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   List<MovablePhoto> photos = [];
 
+  bool _isPickingImage = false;
+
   Future<void> pickImage() async {
+    if (_isPickingImage) return;
+    _isPickingImage = true;
+
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
-    if (picked == null) return;
+    if (picked == null) {
+      _isPickingImage = false;
+      return;
+    }
 
     setState(() {
-      photos.add(MovablePhoto(image: File(picked.path), context: context));
+      if (selectedTool == Tool.image)
+        photos.add(MovablePhoto(image: File(picked.path), context: context));
+      if (selectedSubTool == SubTool.wallpaper)
+        currentBackgroundImage = File(picked.path);
+      _isPickingImage = false;
     });
   }
 
@@ -132,23 +147,20 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   JournalBackground(
                     primaryBackgroundColor: primaryBackgroundColor,
                     secondaryBackgroundColor: secondaryBackgroundColor,
-                    // image: currentBackgroundImage,
+                    image: currentBackgroundImage,
                     // imageOpacity: currentImageOpacity,
                     // imageBlur: currentImageBlur,
                   ),
-
                   ...photos,
                   ...texts,
                   IgnorePointer(
                     ignoring: isIgnoring,
-                    child: Positioned.fill(
-                      child: WhiteBoard(
-                        backgroundColor: Colors.transparent,
-                        strokeColor: currentBrushColor,
-                        strokeWidth: 10,
-                        isErasing: isErasing,
-                        controller: controller,
-                      ),
+                    child: WhiteBoard(
+                      backgroundColor: Colors.transparent,
+                      strokeColor: currentBrushColor,
+                      strokeWidth: strokeWidth,
+                      isErasing: isErasing,
+                      controller: controller,
                     ),
                   ),
                 ],
@@ -209,6 +221,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 },
               ),
             ),
+          if (selectedSubTool == SubTool.thickness)
+            StrokeWidthFab(
+              strokeWidth: strokeWidth,
+              onChanged: (value) {
+                setState(() => strokeWidth = value);
+              },
+            ),
           SizedBox(height: 5),
 
           Row(
@@ -231,7 +250,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         child: JournalSubFAB(
                           selectedTool: selectedTool,
                           selectedSubTool: selectedSubTool,
-                          onToolSelected: (selected) {
+                          onToolSelected: (selected) async {
                             setState(() {
                               selectedSubTool = selected;
                               if (selectedSubTool == SubTool.erase)
@@ -243,6 +262,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                                   SubTool.primaryBackgroundColor)
                                 currentColor = primaryBackgroundColor;
                             });
+                            if (selectedSubTool == SubTool.wallpaper)
+                              await pickImage();
                           },
                           selectedTextKey: selectedTextKey,
                           whiteBoardController: controller,

@@ -1,10 +1,11 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class JournalBackground extends StatelessWidget {
   final Color? primaryBackgroundColor;
   final Color? secondaryBackgroundColor;
-  final ImageProvider? image;
+  final File? image;
   final double imageOpacity;
   final double imageBlur;
 
@@ -19,50 +20,50 @@ class JournalBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          // Gradient or solid color
-          Container(
-            decoration: BoxDecoration(
-              color:
-                  (primaryBackgroundColor ?? secondaryBackgroundColor) ??
-                  Colors.transparent,
-              gradient:
-                  (primaryBackgroundColor != null &&
-                      secondaryBackgroundColor != null)
-                  ? LinearGradient(
-                      colors: [
-                        primaryBackgroundColor!,
-                        secondaryBackgroundColor!,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    )
-                  : null,
+    return Stack(
+      children: [
+        // Gradient or solid color
+
+        if(image==null)
+        Container(
+          decoration: BoxDecoration(
+            color:
+                (primaryBackgroundColor ?? secondaryBackgroundColor) ??
+                Colors.transparent,
+            gradient:
+                (primaryBackgroundColor != null &&
+                    secondaryBackgroundColor != null)
+                ? LinearGradient(
+                    colors: [
+                      primaryBackgroundColor!,
+                      secondaryBackgroundColor!,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  )
+                : null,
+          ),
+        ),
+
+        if (image != null)
+          Opacity(
+            opacity: imageOpacity,
+            child: Image.file(
+              image!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
             ),
           ),
 
-          if (image != null)
-            Opacity(
-              opacity: imageOpacity,
-              child: Image(
-                image: image!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
+        if (imageBlur > 0)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: imageBlur, sigmaY: imageBlur),
+              child: Container(color: Colors.transparent),
             ),
-
-          if (imageBlur > 0)
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: imageBlur, sigmaY: imageBlur),
-                child: Container(color: Colors.transparent),
-              ),
-            ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
