@@ -16,6 +16,7 @@ class FontsFab extends StatelessWidget {
     'Moonlight',
     'OpenSans',
     'Sekuya',
+    'Ransom',
   ];
 
   @override

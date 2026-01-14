@@ -18,6 +18,7 @@ class JournalSubFAB extends StatefulWidget {
 
   final Color? primaryBackgroundColor;
   final Color? secondaryBackgroundColor;
+  final bool? isImageBackground;
 
   const JournalSubFAB({
     super.key,
@@ -29,6 +30,7 @@ class JournalSubFAB extends StatefulWidget {
     this.currentBrushColor,
     this.primaryBackgroundColor,
     this.secondaryBackgroundColor,
+    this.isImageBackground,
   });
 
   @override
@@ -215,7 +217,9 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: AppSvg.icon(context: context, path: AppAssets.wallpaper),
+            icon: (widget.isImageBackground!)?
+            AppSvg.icon(context: context, path: AppAssets.wallpaperFilled):
+            AppSvg.icon(context: context, path: AppAssets.wallpaper),
             onPressed: () {
               widget.onToolSelected(SubTool.wallpaper);
             },

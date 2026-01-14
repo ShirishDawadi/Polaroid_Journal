@@ -1,5 +1,11 @@
 class AppAssets {
   static const baseIcon = 'assets/icons';
+  static const baseImage = 'assets/images';
+
+  //paper bg
+  static const paperBg1 = '$baseImage/paperbg.jpg';
+  static const paperBg2 = '$baseImage/paperbg2.jpg';
+  static const paperBg3 = '$baseImage/paperbg3.jpg';
 
   //image
   static const image = '$baseIcon/image.svg';

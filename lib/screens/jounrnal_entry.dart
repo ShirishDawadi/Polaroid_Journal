@@ -8,6 +8,7 @@ import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
 import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
+import 'package:polaroid_journal/widgets/floatingBars/paper_bg_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/stroke_width_fab.dart';
 import 'package:polaroid_journal/widgets/journal_background.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
@@ -60,8 +61,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     setState(() {
       if (selectedTool == Tool.image)
         photos.add(MovablePhoto(image: File(picked.path), context: context));
-      if (selectedSubTool == SubTool.wallpaper)
+      if (selectedSubTool == SubTool.wallpaper) {
         currentBackgroundImage = File(picked.path);
+        primaryBackgroundColor = null;
+        secondaryBackgroundColor = null;
+      }
       _isPickingImage = false;
     });
   }
@@ -116,8 +120,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       } else {
         primaryBackgroundColor = color;
       }
+      currentBackgroundImage = null;
     }
-
     currentColor = color;
   }
 
@@ -228,6 +232,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 setState(() => strokeWidth = value);
               },
             ),
+          if(selectedSubTool == SubTool.paper)
+          PaperBgFab(),
           SizedBox(height: 5),
 
           Row(
@@ -270,6 +276,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                           currentBrushColor: currentBrushColor,
                           primaryBackgroundColor: primaryBackgroundColor,
                           secondaryBackgroundColor: secondaryBackgroundColor,
+                          isImageBackground : currentBackgroundImage!=null
                         ),
                       ),
                     ),

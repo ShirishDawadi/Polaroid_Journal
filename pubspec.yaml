@@ -46,6 +46,10 @@ flutter:
     - family: Sekuya
       fonts:
         - asset: assets/fonts/Sekuya.ttf
+    - family: Ransom
+      fonts:
+        - asset: assets/fonts/RansomNote.ttf
   assets:
     - assets/icons/
+    - assets/images/
 

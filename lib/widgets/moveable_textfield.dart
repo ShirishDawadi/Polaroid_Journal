@@ -106,6 +106,7 @@ class MovableTextFieldState extends State<MovableTextField> {
     return TextStyle(
       color: textColor,
       fontFamily: fontFamily,
+      fontSize: 40,
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
       fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
       decoration: isUnderline ? TextDecoration.underline : TextDecoration.none,

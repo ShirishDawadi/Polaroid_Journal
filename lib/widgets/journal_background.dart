@@ -22,8 +22,6 @@ class JournalBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Gradient or solid color
-
         if(image==null)
         Container(
           decoration: BoxDecoration(
