@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:polaroid_journal/utils/app_assets.dart';
+import 'package:polaroid_journal/widgets/decorated_icon_button.dart';
+import 'package:polaroid_journal/widgets/svg_widget.dart';
 
 class PaperBgFab extends StatelessWidget {
-  PaperBgFab({super.key});
+  final Function(String) onSelect;
+  final VoidCallback addBg;
+  final VoidCallback deleteBg;
+  PaperBgFab({super.key, required this.onSelect, required this.addBg, required this.deleteBg});
 
   final List<String> paperBg = [
     AppAssets.paperBg1,
@@ -27,11 +32,22 @@ class PaperBgFab extends StatelessWidget {
                   children: [
                     SizedBox(width: 20),
                     GestureDetector(
-                      onTap: () => {},
-                      child: Image.asset(img , width: 50, height: 50,),
+                      onTap: () => onSelect(img),
+                      child: Image.asset(img, width: null, height: 50),
                     ),
                   ],
                 ),
+              ),
+
+              SizedBox(width: 10,),
+
+              DecoratedIconButton(icon: Icon(Icons.add), onPressed: addBg),
+
+              SizedBox(width: 10,),
+
+              DecoratedIconButton(
+                icon: AppSvg.icon(context: context, path: AppAssets.delete),
+                onPressed: deleteBg,
               ),
             ],
           ),

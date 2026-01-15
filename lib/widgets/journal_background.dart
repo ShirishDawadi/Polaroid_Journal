@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class JournalBackground extends StatelessWidget {
   final Color? primaryBackgroundColor;
   final Color? secondaryBackgroundColor;
-  final File? image;
+  final ImageProvider? image;
   final double imageOpacity;
   final double imageBlur;
 
@@ -22,7 +21,7 @@ class JournalBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        if(image==null)
+        // if(image==null)
         Container(
           decoration: BoxDecoration(
             color:
@@ -46,8 +45,8 @@ class JournalBackground extends StatelessWidget {
         if (image != null)
           Opacity(
             opacity: imageOpacity,
-            child: Image.file(
-              image!,
+            child: Image(
+              image: image!,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
@@ -55,7 +54,7 @@ class JournalBackground extends StatelessWidget {
           ),
 
         if (imageBlur > 0)
-          Positioned.fill(
+          ClipRRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: imageBlur, sigmaY: imageBlur),
               child: Container(color: Colors.transparent),

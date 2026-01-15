@@ -39,6 +39,7 @@ class AppAssets {
   static const background = '$baseIcon/background.svg';
   static const wallpaper = '$baseIcon/wallpaper.svg';
   static const wallpaperFilled = '$baseIcon/wallpaper-filled.svg';
+  static const slider = "$baseIcon/slider.svg";
   static const paper = '$baseIcon/paper.svg';
   static const paperFilled = '$baseIcon/paper-filled.svg';
 }

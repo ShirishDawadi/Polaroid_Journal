@@ -217,6 +217,14 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.slider),
+            onPressed: () {
+              widget.onToolSelected(SubTool.slider);
+            },
+          ),
+          const SizedBox(width: 15),
+
+          DecoratedIconButton(
             icon: (widget.isImageBackground!)?
             AppSvg.icon(context: context, path: AppAssets.wallpaperFilled):
             AppSvg.icon(context: context, path: AppAssets.wallpaper),
@@ -227,9 +235,9 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.primaryBackgroundColor != null)
+            icon: (widget.primaryBackgroundColor != null )
                 ? Icon(Icons.circle_rounded)
-                : Icon(Icons.close),
+                : Icon(Icons.add),
             color: widget.primaryBackgroundColor,
             onPressed: () =>
                 widget.onToolSelected(SubTool.primaryBackgroundColor),
@@ -237,9 +245,9 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.secondaryBackgroundColor != null)
+            icon: (widget.secondaryBackgroundColor != null )
                 ? Icon(Icons.circle_rounded)
-                : Icon(Icons.close),
+                : Icon(Icons.add),
             color: widget.secondaryBackgroundColor,
             onPressed: () =>
                 widget.onToolSelected(SubTool.secondaryBackgroundColor),

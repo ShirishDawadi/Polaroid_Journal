@@ -26,6 +26,7 @@ enum SubTool {
   //background
   wallpaper,
   paper,
+  slider,
   primaryBackgroundColor,
   secondaryBackgroundColor,
 }

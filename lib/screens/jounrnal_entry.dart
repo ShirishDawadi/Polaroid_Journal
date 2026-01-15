@@ -9,7 +9,7 @@ import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart'
 import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
 import 'package:polaroid_journal/widgets/floatingBars/paper_bg_fab.dart';
-import 'package:polaroid_journal/widgets/floatingBars/stroke_width_fab.dart';
+import 'package:polaroid_journal/widgets/floatingBars/slider_fab.dart';
 import 'package:polaroid_journal/widgets/journal_background.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
@@ -24,7 +24,9 @@ class JournalEntryScreen extends StatefulWidget {
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color? primaryBackgroundColor = Colors.white;
   Color? secondaryBackgroundColor;
-  File? currentBackgroundImage;
+  ImageProvider? currentBackgroundImage;
+  double currentImageOpacity = 1;
+  double currentImageBlur = 0;
 
   Color currentTextColor = Colors.black;
   Color currentBrushColor = Colors.black;
@@ -62,9 +64,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       if (selectedTool == Tool.image)
         photos.add(MovablePhoto(image: File(picked.path), context: context));
       if (selectedSubTool == SubTool.wallpaper) {
-        currentBackgroundImage = File(picked.path);
-        primaryBackgroundColor = null;
-        secondaryBackgroundColor = null;
+        currentBackgroundImage = FileImage(File(picked.path));
       }
       _isPickingImage = false;
     });
@@ -120,7 +120,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       } else {
         primaryBackgroundColor = color;
       }
-      currentBackgroundImage = null;
     }
     currentColor = color;
   }
@@ -152,8 +151,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     primaryBackgroundColor: primaryBackgroundColor,
                     secondaryBackgroundColor: secondaryBackgroundColor,
                     image: currentBackgroundImage,
-                    // imageOpacity: currentImageOpacity,
-                    // imageBlur: currentImageBlur,
+                    imageOpacity: currentImageOpacity,
+                    imageBlur: currentImageBlur,
                   ),
                   ...photos,
                   ...texts,
@@ -211,6 +210,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 },
               ),
             ),
+
           if (selectedSubTool == SubTool.font)
             IgnorePointer(
               ignoring: isOpen,
@@ -225,15 +225,52 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 },
               ),
             ),
+
           if (selectedSubTool == SubTool.thickness)
-            StrokeWidthFab(
+            SliderFab(
+              isCustom: true,
               strokeWidth: strokeWidth,
+              minValue: 1,
+              maxValue: 20,
               onChanged: (value) {
                 setState(() => strokeWidth = value);
               },
             ),
-          if(selectedSubTool == SubTool.paper)
-          PaperBgFab(),
+
+          if (selectedSubTool == SubTool.wallpaper)
+            PaperBgFab(
+              onSelect: (image) {
+                setState(() => currentBackgroundImage = AssetImage(image));
+              },
+              addBg: () async => await pickImage(),
+              deleteBg: () {
+                setState(() => currentBackgroundImage = null);
+              },
+            ),
+
+          if (selectedSubTool == SubTool.slider)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SliderFab(
+                  strokeWidth: currentImageOpacity,
+                  minValue: 0,
+                  maxValue: 1,
+                  onChanged: (value) {
+                    setState(() => currentImageOpacity = value);
+                  },
+                ),
+                SliderFab(
+                  strokeWidth: currentImageBlur,
+                  minValue: 0,
+                  maxValue: 20,
+                  onChanged: (value) {
+                    setState(() => currentImageBlur = value);
+                  },
+                ),
+              ],
+            ),
+
           SizedBox(height: 5),
 
           Row(
@@ -268,15 +305,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                                   SubTool.primaryBackgroundColor)
                                 currentColor = primaryBackgroundColor;
                             });
-                            if (selectedSubTool == SubTool.wallpaper)
-                              await pickImage();
                           },
                           selectedTextKey: selectedTextKey,
                           whiteBoardController: controller,
                           currentBrushColor: currentBrushColor,
                           primaryBackgroundColor: primaryBackgroundColor,
                           secondaryBackgroundColor: secondaryBackgroundColor,
-                          isImageBackground : currentBackgroundImage!=null
+                          isImageBackground: currentBackgroundImage != null,
                         ),
                       ),
                     ),
