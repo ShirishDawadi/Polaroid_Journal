@@ -305,6 +305,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                                   SubTool.primaryBackgroundColor)
                                 currentColor = primaryBackgroundColor;
                             });
+                            if(selectedSubTool == SubTool.photo) await pickImage();
                           },
                           selectedTextKey: selectedTextKey,
                           whiteBoardController: controller,
@@ -340,7 +341,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     }
                   });
 
-                  if (tool == Tool.image) await pickImage();
+                  // if (tool == Tool.image) await pickImage();
 
                   if (tool == Tool.text) addTextField();
                 },

@@ -39,6 +39,7 @@ class JournalSubFAB extends StatefulWidget {
 
 class _JournalSubFABState extends State<JournalSubFAB> {
   bool isErasing = false;
+  Widget subFab = SizedBox();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
 
       final textState = widget.selectedTextKey!.currentState!;
 
-      return Row(
+      subFab = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
@@ -142,7 +143,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
     }
 
     if (widget.selectedTool == Tool.draw) {
-      return Row(
+      subFab = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
@@ -184,11 +185,8 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           ),
           const SizedBox(width: 15),
 
-           DecoratedIconButton(
-            icon: AppSvg.icon(
-              context: context,
-              path:AppAssets.thickness,
-            ),
+          DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.thickness),
             onPressed: () {
               widget.onToolSelected(SubTool.thickness);
             },
@@ -205,7 +203,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
     }
 
     if (widget.selectedTool == Tool.background) {
-      return Row(
+      subFab = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           DecoratedIconButton(
@@ -225,9 +223,9 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.isImageBackground!)?
-            AppSvg.icon(context: context, path: AppAssets.wallpaperFilled):
-            AppSvg.icon(context: context, path: AppAssets.wallpaper),
+            icon: (widget.isImageBackground!)
+                ? AppSvg.icon(context: context, path: AppAssets.wallpaperFilled)
+                : AppSvg.icon(context: context, path: AppAssets.wallpaper),
             onPressed: () {
               widget.onToolSelected(SubTool.wallpaper);
             },
@@ -235,7 +233,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.primaryBackgroundColor != null )
+            icon: (widget.primaryBackgroundColor != null)
                 ? Icon(Icons.circle_rounded)
                 : Icon(Icons.add),
             color: widget.primaryBackgroundColor,
@@ -245,7 +243,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.secondaryBackgroundColor != null )
+            icon: (widget.secondaryBackgroundColor != null)
                 ? Icon(Icons.circle_rounded)
                 : Icon(Icons.add),
             color: widget.secondaryBackgroundColor,
@@ -255,19 +253,29 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         ],
       );
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (int i = 0; i < 4; i++) ...[
+
+    if (widget.selectedTool == Tool.image) {
+      subFab = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
           DecoratedIconButton(
-            icon: widget.selectedSubTool == i
-                ? Icon(Icons.circle)
-                : Icon(Icons.circle_outlined),
-            onPressed: () => widget.onToolSelected(SubTool.color),
+            icon: AppSvg.icon(context: context, path: AppAssets.sticker),
+            onPressed: () {
+              widget.onToolSelected(SubTool.sticker);
+            },
           ),
           const SizedBox(width: 15),
+
+          DecoratedIconButton(
+            icon: AppSvg.icon(context: context, path: AppAssets.photo),
+            onPressed: () {
+              widget.onToolSelected(SubTool.photo);
+            },
+          ),
         ],
-      ],
-    );
+      );
+    }
+
+    return subFab;
   }
 }

@@ -66,12 +66,6 @@ class _MovablePhotoState extends State<MovablePhoto> {
               height: 200,
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.9),
-                    blurRadius: 5,
-                  ),
-                ],
               ),
               clipBehavior: Clip.hardEdge,
               child: Padding(

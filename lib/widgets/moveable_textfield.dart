@@ -37,8 +37,10 @@ class MovableTextFieldState extends State<MovableTextField> {
   Color textColor = Colors.black;
   TextAlign textAlign = TextAlign.center;
   String fontFamily = 'Roboto';
+  double borderRadius = 0;
+  Color backgroundColor = Colors.transparent;
 
-  @override 
+  @override
   void initState() {
     super.initState();
 
@@ -102,11 +104,24 @@ class MovableTextFieldState extends State<MovableTextField> {
     });
   }
 
+//adding later if i wanna
+  void setBorderRadius(double radius){
+    setState(() {
+      borderRadius = radius;
+    });
+  }
+
+  void setBackgroundColor(Color color){
+    setState(() {
+      backgroundColor = color;
+    });
+  }
+
   TextStyle get textStyle {
     return TextStyle(
       color: textColor,
       fontFamily: fontFamily,
-      fontSize: 40,
+      fontSize: 20,
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
       fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
       decoration: isUnderline ? TextDecoration.underline : TextDecoration.none,
@@ -155,15 +170,18 @@ class MovableTextFieldState extends State<MovableTextField> {
               }
             },
             child: IntrinsicWidth(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: 75,
-                  maxWidth: MediaQuery.of(context).size.width,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(borderRadius),
                 ),
-                child: SizedBox(
-                  width: isFocused
-                      ? MediaQuery.of(context).size.width
-                      : null,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: isFocused
+                        ? MediaQuery.of(context).size.width - 20
+                        : 75,
+                    maxWidth: MediaQuery.of(context).size.width - 20,
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: TextField(

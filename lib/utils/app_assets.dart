@@ -10,6 +10,10 @@ class AppAssets {
   //image
   static const image = '$baseIcon/image.svg';
   static const imageFilled = '$baseIcon/image-filled.svg';
+  static const sticker = '$baseIcon/sticker.svg';
+  static const stickerFilled = '$baseIcon/sticker-filled.svg';
+  static const photo = '$baseIcon/polaroid.svg';
+  static const photoFilled = '$baseIcon/polaroid-filled.svg';
 
   //brush
   static const brush = '$baseIcon/brush.svg';

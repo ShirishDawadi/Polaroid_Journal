@@ -9,6 +9,10 @@ enum SubTool {
   //common
   color,
 
+  //image
+  sticker,
+  photo,
+  
   //text
   bold,
   italic,
