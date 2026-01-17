@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class MovablePhoto extends StatefulWidget {
-  final File image;
+  final ImageProvider image;
   final BuildContext context;
 
   const MovablePhoto({super.key, required this.image, required this.context});
@@ -20,7 +19,7 @@ class _MovablePhotoState extends State<MovablePhoto> {
 
   double rotation = 0.0;
   double baseRotation = 0.0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -61,16 +60,13 @@ class _MovablePhotoState extends State<MovablePhoto> {
                 y += (dx * sin + dy * cos) * scale;
               });
             },
-            child: Container(
-              width: 170,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 200
               ),
-              clipBehavior: Clip.hardEdge,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 15, 15, 45),
-                child: Image.file(widget.image, fit: BoxFit.cover),
+              child: ClipRRect(
+                borderRadius: BorderRadius.zero,
+                child: Image(image: widget.image, fit: BoxFit.contain),
               ),
             ),
           ),

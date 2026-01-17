@@ -1,11 +1,32 @@
 class AppAssets {
   static const baseIcon = 'assets/icons';
   static const baseImage = 'assets/images';
+  static const baseSticker = 'assets/stickers';
 
   //paper bg
   static const paperBg1 = '$baseImage/paperbg.jpg';
   static const paperBg2 = '$baseImage/paperbg2.jpg';
   static const paperBg3 = '$baseImage/paperbg3.jpg';
+
+  //stickers
+  static const sticker1 = '$baseSticker/sticker1.png';
+  static const sticker2 = '$baseSticker/sticker2.png';
+  static const sticker3 = '$baseSticker/sticker3.png';
+  static const sticker4 = '$baseSticker/sticker4.png';
+  static const sticker5 = '$baseSticker/sticker5.png';
+  static const sticker6 = '$baseSticker/sticker6.png';
+  static const sticker7 = '$baseSticker/sticker7.png';
+  static const sticker8 = '$baseSticker/sticker8.png';
+  static const sticker9 = '$baseSticker/sticker9.png';
+  static const sticker10 = '$baseSticker/sticker10.png';
+  static const sticker11 = '$baseSticker/sticker11.png';
+  static const sticker12 = '$baseSticker/sticker12.png';
+  static const sticker13 = '$baseSticker/sticker13.png';
+  static const sticker14 = '$baseSticker/sticker14.png';
+  static const sticker15 = '$baseSticker/sticker15.png';
+  static const sticker16 = '$baseSticker/sticker16.png';
+  static const sticker17 = '$baseSticker/sticker17.png';
+
 
   //image
   static const image = '$baseIcon/image.svg';

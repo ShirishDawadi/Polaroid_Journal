@@ -14,6 +14,7 @@ import 'package:polaroid_journal/widgets/journal_background.dart';
 import 'package:polaroid_journal/widgets/moveable_photo.dart';
 import 'package:polaroid_journal/widgets/moveable_textfield.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
+import 'package:polaroid_journal/widgets/stickers_bottom_sheet.dart';
 import 'package:whiteboard/whiteboard.dart';
 
 class JournalEntryScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color? primaryBackgroundColor = Colors.white;
   Color? secondaryBackgroundColor;
   ImageProvider? currentBackgroundImage;
+  // ImageProvider? currentImage;
   double currentImageOpacity = 1;
   double currentImageBlur = 0;
 
@@ -61,8 +63,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     }
 
     setState(() {
-      if (selectedTool == Tool.image)
-        photos.add(MovablePhoto(image: File(picked.path), context: context));
+      if (selectedSubTool == SubTool.photo)
+        photos.add(
+          MovablePhoto(image: FileImage(File(picked.path)), context: context),
+        );
       if (selectedSubTool == SubTool.wallpaper) {
         currentBackgroundImage = FileImage(File(picked.path));
       }
@@ -122,6 +126,24 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       }
     }
     currentColor = color;
+  }
+
+  void openBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: false,
+      builder: (context) {
+        return StickersBottomSheet(
+          onSelect: (sticker) => {
+            setState(() {
+              photos.add(
+                MovablePhoto(image: AssetImage(sticker), context: context),
+              );
+            }),
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -305,7 +327,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                                   SubTool.primaryBackgroundColor)
                                 currentColor = primaryBackgroundColor;
                             });
-                            if(selectedSubTool == SubTool.photo) await pickImage();
+                            if (selectedSubTool == SubTool.photo)
+                              await pickImage();
+                            if (selectedSubTool == SubTool.sticker)
+                              openBottomSheet();
                           },
                           selectedTextKey: selectedTextKey,
                           whiteBoardController: controller,
