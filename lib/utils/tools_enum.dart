@@ -21,6 +21,7 @@ enum SubTool {
   align,
 
   //draw
+  add,
   undo,
   redo,
   delete,

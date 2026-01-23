@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:polaroid_journal/models/layer_model.dart';
 import 'package:polaroid_journal/utils/tools_enum.dart';
 import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
 import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
@@ -11,8 +12,9 @@ import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart'
 import 'package:polaroid_journal/widgets/floatingBars/paper_bg_fab.dart';
 import 'package:polaroid_journal/widgets/floatingBars/slider_fab.dart';
 import 'package:polaroid_journal/widgets/journal_background.dart';
-import 'package:polaroid_journal/widgets/moveable_photo.dart';
-import 'package:polaroid_journal/widgets/moveable_textfield.dart';
+import 'package:polaroid_journal/widgets/layer/drawing_layer.dart';
+import 'package:polaroid_journal/widgets/layer/moveable_photo.dart';
+import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
 import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
 import 'package:polaroid_journal/widgets/stickers_bottom_sheet.dart';
 import 'package:whiteboard/whiteboard.dart';
@@ -23,10 +25,12 @@ class JournalEntryScreen extends StatefulWidget {
 }
 
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
+  List<LayerModel> layers = [];
+  LayerModel? focusedLayer;
+
   Color? primaryBackgroundColor = Colors.white;
   Color? secondaryBackgroundColor;
   ImageProvider? currentBackgroundImage;
-  // ImageProvider? currentImage;
   double currentImageOpacity = 1;
   double currentImageBlur = 0;
 
@@ -35,7 +39,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Color? currentColor = Colors.black;
   bool isIgnoring = true;
 
-  late final WhiteBoardController controller;
   bool isErasing = false;
   double strokeWidth = 3;
 
@@ -45,8 +48,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   List<GlobalKey<MovableTextFieldState>> textKeys = [];
   List<MovableTextField> texts = [];
   GlobalKey<MovableTextFieldState>? selectedTextKey;
-
-  List<MovablePhoto> photos = [];
 
   bool _isPickingImage = false;
 
@@ -62,16 +63,26 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       return;
     }
 
-    setState(() {
-      if (selectedSubTool == SubTool.photo)
-        photos.add(
-          MovablePhoto(image: FileImage(File(picked.path)), context: context),
-        );
-      if (selectedSubTool == SubTool.wallpaper) {
+    if (selectedSubTool == SubTool.photo) {
+      final layer = LayerModel(
+        id: UniqueKey().toString(),
+        type: LayerType.photo,
+        image: FileImage(File(picked.path)),
+      );
+
+      setState(() {
+        focusedLayer = layer;
+        layers.add(layer);
+      });
+    }
+
+    if (selectedSubTool == SubTool.wallpaper) {
+      setState(() {
         currentBackgroundImage = FileImage(File(picked.path));
-      }
-      _isPickingImage = false;
-    });
+      });
+    }
+
+    _isPickingImage = false;
   }
 
   void addTextField() {
@@ -134,12 +145,17 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       isScrollControlled: false,
       builder: (context) {
         return StickersBottomSheet(
-          onSelect: (sticker) => {
+          onSelect: (sticker) {
+            final layer = LayerModel(
+              id: UniqueKey().toString(),
+              type: LayerType.photo,
+              image: AssetImage(sticker),
+            );
+
             setState(() {
-              photos.add(
-                MovablePhoto(image: AssetImage(sticker), context: context),
-              );
-            }),
+              focusedLayer = layer;
+              layers.add(layer);
+            });
           },
         );
       },
@@ -148,7 +164,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   @override
   void initState() {
-    controller = WhiteBoardController();
     super.initState();
   }
 
@@ -161,6 +176,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           GestureDetector(
             onTap: () {
               FocusScope.of(context).unfocus();
+              if (selectedTool != Tool.draw) focusedLayer = null;
             },
             child: Container(
               margin: EdgeInsets.all(10),
@@ -176,18 +192,31 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                     imageOpacity: currentImageOpacity,
                     imageBlur: currentImageBlur,
                   ),
-                  ...photos,
+
+                  for (final layer in layers)
+                    if (layer.type == LayerType.photo)
+                      MovablePhoto(
+                        layer: layer,
+                        isFocused:
+                            layer == focusedLayer && selectedTool != Tool.draw,
+                        onFocus: () => setState(() {
+                          if (layers.last != layer) {
+                            layers.remove(layer);
+                            layers.add(layer);
+                          }
+                          if (selectedTool != Tool.draw) focusedLayer = layer;
+                        }),
+                      )
+                    else if (layer.type == LayerType.drawing)
+                      DrawingLayer(
+                        key: ValueKey(layer.id),
+                        layer: layer,
+                        isActive: !isIgnoring,
+                        currentBrushColor: currentBrushColor,
+                        strokeWidth: strokeWidth,
+                        isErasing: isErasing,
+                      ),
                   ...texts,
-                  IgnorePointer(
-                    ignoring: isIgnoring,
-                    child: WhiteBoard(
-                      backgroundColor: Colors.transparent,
-                      strokeColor: currentBrushColor,
-                      strokeWidth: strokeWidth,
-                      isErasing: isErasing,
-                      controller: controller,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -274,21 +303,25 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SliderFab(
-                  strokeWidth: currentImageOpacity,
-                  minValue: 0,
-                  maxValue: 1,
-                  onChanged: (value) {
-                    setState(() => currentImageOpacity = value);
-                  },
+                Flexible(
+                  child: SliderFab(
+                    strokeWidth: currentImageOpacity,
+                    minValue: 0,
+                    maxValue: 1,
+                    onChanged: (value) {
+                      setState(() => currentImageOpacity = value);
+                    },
+                  ),
                 ),
-                SliderFab(
-                  strokeWidth: currentImageBlur,
-                  minValue: 0,
-                  maxValue: 20,
-                  onChanged: (value) {
-                    setState(() => currentImageBlur = value);
-                  },
+                Flexible(
+                  child: SliderFab(
+                    strokeWidth: currentImageBlur,
+                    minValue: 0,
+                    maxValue: 20,
+                    onChanged: (value) {
+                      setState(() => currentImageBlur = value);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -326,6 +359,15 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                               if (selectedSubTool ==
                                   SubTool.primaryBackgroundColor)
                                 currentColor = primaryBackgroundColor;
+                              if (selectedSubTool == SubTool.add) {
+                                final l = LayerModel(
+                                  id: UniqueKey().toString(),
+                                  type: LayerType.drawing,
+                                  whiteBoardController: WhiteBoardController(),
+                                );
+                                layers.add(l);
+                                focusedLayer = l;
+                              }
                             });
                             if (selectedSubTool == SubTool.photo)
                               await pickImage();
@@ -333,7 +375,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                               openBottomSheet();
                           },
                           selectedTextKey: selectedTextKey,
-                          whiteBoardController: controller,
+                          whiteBoardController:
+                              focusedLayer?.type == LayerType.drawing
+                              ? focusedLayer!.whiteBoardController
+                              : null,
                           currentBrushColor: currentBrushColor,
                           primaryBackgroundColor: primaryBackgroundColor,
                           secondaryBackgroundColor: secondaryBackgroundColor,
@@ -353,9 +398,21 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   setState(() {
                     isOpen = false;
                     selectedTool = tool;
-                    if (selectedTool == Tool.draw) {
+                    if (tool == Tool.draw) {
                       isIgnoring = false;
-                      currentColor = currentBrushColor;
+                      final drawingLayer = layers.lastWhere(
+                        (l) => l.type == LayerType.drawing,
+                        orElse: () {
+                          final l = LayerModel(
+                            id: UniqueKey().toString(),
+                            type: LayerType.drawing,
+                            whiteBoardController: WhiteBoardController(),
+                          );
+                          layers.add(l);
+                          return l;
+                        },
+                      );
+                      focusedLayer = drawingLayer;
                     } else {
                       isIgnoring = true;
                     }
@@ -365,8 +422,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                       currentColor = primaryBackgroundColor;
                     }
                   });
-
-                  // if (tool == Tool.image) await pickImage();
 
                   if (tool == Tool.text) addTextField();
                 },
