@@ -45,9 +45,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   bool isOpen = false;
   Tool? selectedTool;
   SubTool? selectedSubTool;
-  List<GlobalKey<MovableTextFieldState>> textKeys = [];
-  List<MovableTextField> texts = [];
-  GlobalKey<MovableTextFieldState>? selectedTextKey;
 
   bool _isPickingImage = false;
 
@@ -86,33 +83,15 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   void addTextField() {
-    final key = GlobalKey<MovableTextFieldState>();
+    final layer = LayerModel(
+      id: UniqueKey().toString(),
+      type: LayerType.text,
+      text: '',
+    );
 
-    textKeys.add(key);
     setState(() {
-      texts.add(
-        MovableTextField(
-          key: key,
-          onRemove: (fieldKey) {
-            setState(() {
-              texts.removeWhere((t) => t.key == fieldKey);
-              textKeys.removeWhere((k) => k == fieldKey);
-
-              if (selectedTextKey == fieldKey) {
-                selectedTextKey = null;
-              }
-            });
-          },
-          context: context,
-          onFocusChanged: (key, isFocused) {
-            setState(() {
-              if (isFocused) {
-                selectedTextKey = key as GlobalKey<MovableTextFieldState>;
-              }
-            });
-          },
-        ),
-      );
+      focusedLayer = layer;
+      layers.add(layer);
     });
   }
 
@@ -124,9 +103,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
       if (selectedTool == Tool.text) {
         currentTextColor = color;
-        if (selectedTextKey != null && selectedTextKey!.currentState != null) {
-          selectedTextKey!.currentState!.setTextColor(color);
-        }
+        focusedLayer!.textColor = color;
       }
     }
     if (selectedTool == Tool.background) {
@@ -176,7 +153,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           GestureDetector(
             onTap: () {
               FocusScope.of(context).unfocus();
-              if (selectedTool != Tool.draw) focusedLayer = null;
+              if (selectedTool != Tool.draw) {
+                setState(() {
+                  selectedTool = null;
+                  selectedSubTool = null;
+                  focusedLayer = null;
+                });
+              }
             },
             child: Container(
               margin: EdgeInsets.all(10),
@@ -196,6 +179,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   for (final layer in layers)
                     if (layer.type == LayerType.photo)
                       MovablePhoto(
+                        key: ValueKey(layer.id),
                         layer: layer,
                         isFocused:
                             layer == focusedLayer && selectedTool != Tool.draw,
@@ -205,6 +189,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                             layers.add(layer);
                           }
                           if (selectedTool != Tool.draw) focusedLayer = layer;
+                          if (selectedTool != Tool.image)
+                            selectedTool = Tool.image;
                         }),
                       )
                     else if (layer.type == LayerType.drawing)
@@ -215,8 +201,23 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         currentBrushColor: currentBrushColor,
                         strokeWidth: strokeWidth,
                         isErasing: isErasing,
+                      )
+                    else if (layer.type == LayerType.text)
+                      MovableTextField(
+                        key: ValueKey(layer.id),
+                        layer: layer,
+                        isFocused:
+                            layer == focusedLayer && selectedTool != Tool.draw,
+                        onFocus: () => setState(() {
+                          if (layers.last != layer) {
+                            layers.remove(layer);
+                            layers.add(layer);
+                          }
+                          if (selectedTool != Tool.draw) focusedLayer = layer;
+                          if (selectedTool != Tool.text)
+                            selectedTool = Tool.text;
+                        }),
                       ),
-                  ...texts,
                 ],
               ),
             ),
@@ -268,10 +269,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               child: FontsFab(
                 onSelect: (font) {
                   setState(() {
-                    if (selectedTextKey != null &&
-                        selectedTextKey!.currentState != null) {
-                      selectedTextKey!.currentState!.setFontFamily(font);
-                    }
+                    focusedLayer!.fontFamily = font;
                   });
                 },
               ),
@@ -374,7 +372,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                             if (selectedSubTool == SubTool.sticker)
                               openBottomSheet();
                           },
-                          selectedTextKey: selectedTextKey,
+                          layer: focusedLayer,
                           whiteBoardController:
                               focusedLayer?.type == LayerType.drawing
                               ? focusedLayer!.whiteBoardController

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/models/layer_model.dart';
 import 'package:polaroid_journal/utils/app_assets.dart';
 import 'package:polaroid_journal/utils/tools_enum.dart';
 import 'package:polaroid_journal/widgets/decorated_icon_button.dart';
-import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
+// import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
 import 'package:polaroid_journal/widgets/svg_widget.dart';
 import 'package:whiteboard/whiteboard.dart';
 
@@ -11,7 +12,8 @@ class JournalSubFAB extends StatefulWidget {
   final SubTool? selectedSubTool;
   final Function(SubTool) onToolSelected;
 
-  final GlobalKey<MovableTextFieldState>? selectedTextKey;
+  // final GlobalKey<MovableTextFieldState>? selectedTextKey;
+  final LayerModel? layer;
 
   final WhiteBoardController? whiteBoardController;
   final Color? currentBrushColor;
@@ -25,7 +27,8 @@ class JournalSubFAB extends StatefulWidget {
     required this.selectedTool,
     required this.selectedSubTool,
     required this.onToolSelected,
-    this.selectedTextKey,
+    // this.selectedTextKey,
+    this.layer,
     this.whiteBoardController,
     this.currentBrushColor,
     this.primaryBackgroundColor,
@@ -44,22 +47,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
   @override
   Widget build(BuildContext context) {
     if (widget.selectedTool == Tool.text) {
-      if (widget.selectedTextKey == null ||
-          widget.selectedTextKey!.currentState == null) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            'Tap a text to edit',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      }
-
-      final textState = widget.selectedTextKey!.currentState!;
+      final layer = widget.layer!;
 
       subFab = Row(
         mainAxisSize: MainAxisSize.min,
@@ -67,11 +55,11 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (textState.isBold) ? AppAssets.boldFilled : AppAssets.bold,
+              path: (layer.isBold) ? AppAssets.boldFilled : AppAssets.bold,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.bold);
-              setState(() => textState.toggleBold());
+              setState(() => layer.isBold = !layer.isBold);
             },
           ),
           const SizedBox(width: 15),
@@ -79,13 +67,13 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (textState.isItalic)
+              path: (layer.isItalic)
                   ? AppAssets.italicFilled
                   : AppAssets.italic,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.italic);
-              setState(() => textState.toggleItalic());
+              setState(() => layer.isItalic = !layer.isItalic);
             },
           ),
           const SizedBox(width: 15),
@@ -93,13 +81,13 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (textState.isUnderline)
+              path: (layer.isUnderline)
                   ? AppAssets.underlineFilled
                   : AppAssets.underline,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.underline);
-              setState(() => textState.toggleUnderline());
+              setState(() => layer.isUnderline = !layer.isUnderline);
             },
           ),
           const SizedBox(width: 15),
@@ -113,21 +101,21 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (textState.textAlign == TextAlign.left)
+              path: (layer.textAlign == TextAlign.left)
                   ? AppAssets.leftAlign
-                  : (textState.textAlign == TextAlign.right)
+                  : (layer.textAlign == TextAlign.right)
                   ? AppAssets.rightAlign
                   : AppAssets.centerAlign,
             ),
             onPressed: () {
               setState(() {
                 widget.onToolSelected(SubTool.align);
-                if (textState.textAlign == TextAlign.left) {
-                  textState.setTextAlign(TextAlign.center);
-                } else if (textState.textAlign == TextAlign.center) {
-                  textState.setTextAlign(TextAlign.right);
+                if (layer.textAlign == TextAlign.left) {
+                  layer.textAlign = TextAlign.center;
+                } else if (layer.textAlign == TextAlign.center) {
+                  layer.textAlign = TextAlign.right;
                 } else {
-                  textState.setTextAlign(TextAlign.left);
+                  layer.textAlign = TextAlign.left;
                 }
               });
             },
@@ -135,7 +123,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: Icon(Icons.format_color_text, color: textState.textColor),
+            icon: Icon(Icons.format_color_text, color: layer.textColor),
             onPressed: () => widget.onToolSelected(SubTool.color),
           ),
         ],

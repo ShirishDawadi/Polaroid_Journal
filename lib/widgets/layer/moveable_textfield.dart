@@ -1,136 +1,65 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/models/layer_model.dart';
 
 class MovableTextField extends StatefulWidget {
-  final Function(Key) onRemove;
-  final BuildContext context;
-  final Function(Key, bool)? onFocusChanged;
+  final LayerModel layer;
+  final bool isFocused;
+  final VoidCallback onFocus;
 
   const MovableTextField({
     super.key,
-    required this.onRemove,
-    required this.context,
-    this.onFocusChanged,
+    required this.layer,
+    required this.isFocused,
+    required this.onFocus,
   });
 
   @override
-  State<MovableTextField> createState() => MovableTextFieldState();
+  State<MovableTextField> createState() => _MovableTextFieldState();
 }
 
-class MovableTextFieldState extends State<MovableTextField> {
-  double x = 0, y = 0;
-  double scale = 1.0, rotation = 0.0;
-
+class _MovableTextFieldState extends State<MovableTextField> {
   double baseScale = 1.0;
   double baseRotation = 0.0;
-
-  double focusedX = 0, focusedY = 0;
-  double focusedScale = 1.0, focusedRotation = 0.0;
+  bool isBeingManipulated = false;
 
   final controller = TextEditingController();
   final focus = FocusNode();
-  bool isFocused = false;
-
-  bool isBold = false;
-  bool isItalic = false;
-  bool isUnderline = false;
-  Color textColor = Colors.black;
-  TextAlign textAlign = TextAlign.center;
-  String fontFamily = 'Roboto';
-  double borderRadius = 0;
-  Color backgroundColor = Colors.transparent;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final screen = MediaQuery.of(widget.context).size;
-    final kbHeight = MediaQuery.of(widget.context).viewInsets.bottom;
-
-    y = (screen.height - kbHeight) * 0.30;
-    focusedY = y;
-
-    focus.requestFocus();
-    focus.addListener(_handleFocusChange);
-  }
-
-  void _handleFocusChange() {
-    if (!mounted) return;
-
-    setState(() {
-      isFocused = focus.hasFocus;
-    });
-
-    widget.onFocusChanged?.call(widget.key!, isFocused);
-
-    if (!isFocused && controller.text.trim().isEmpty) {
-      widget.onRemove(widget.key!);
-    }
-  }
-
-  void toggleBold() {
-    setState(() {
-      isBold = !isBold;
-    });
-  }
-
-  void toggleItalic() {
-    setState(() {
-      isItalic = !isItalic;
-    });
-  }
-
-  void toggleUnderline() {
-    setState(() {
-      isUnderline = !isUnderline;
-    });
-  }
-
-  void setTextColor(Color color) {
-    setState(() {
-      textColor = color;
-    });
-  }
-
-  void setTextAlign(TextAlign align) {
-    setState(() {
-      textAlign = align;
-    });
-  }
-
-  void setFontFamily(String font) {
-    setState(() {
-      fontFamily = font;
-    });
-  }
-
-//adding later if i wanna
-  void setBorderRadius(double radius){
-    setState(() {
-      borderRadius = radius;
-    });
-  }
-
-  void setBackgroundColor(Color color){
-    setState(() {
-      backgroundColor = color;
-    });
-  }
 
   TextStyle get textStyle {
     return TextStyle(
-      color: textColor,
-      fontFamily: fontFamily,
+      color: widget.layer.textColor,
+      fontFamily: widget.layer.fontFamily,
       fontSize: 20,
-      fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-      fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-      decoration: isUnderline ? TextDecoration.underline : TextDecoration.none,
+      fontWeight: widget.layer.isBold ? FontWeight.bold : FontWeight.normal,
+      fontStyle: widget.layer.isItalic ? FontStyle.italic : FontStyle.normal,
+      decoration: widget.layer.isUnderline
+          ? TextDecoration.underline
+          : TextDecoration.none,
     );
   }
 
   @override
+  void initState() {
+    super.initState();
+    controller.text = widget.layer.text!;
+    if (widget.isFocused) {
+      focus.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MovableTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isFocused && !oldWidget.isFocused) {
+      focus.requestFocus();
+    } else if (!widget.isFocused && oldWidget.isFocused) {
+      focus.unfocus();
+    }
+  }
+
+  @override
   void dispose() {
-    focus.removeListener(_handleFocusChange);
     controller.dispose();
     focus.dispose();
     super.dispose();
@@ -138,63 +67,72 @@ class MovableTextFieldState extends State<MovableTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final layer = widget.layer;
+
     return Positioned(
-      left: (isFocused) ? focusedX : x,
-      top: (isFocused) ? focusedY : y,
+      left: (widget.isFocused && !isBeingManipulated) ? 0 : layer.position.dx,
+      top: (widget.isFocused && !isBeingManipulated) ? 0 : layer.position.dy,
       child: Transform.rotate(
-        angle: (isFocused) ? focusedRotation : rotation,
+        angle: (widget.isFocused && !isBeingManipulated) ? 0 : layer.rotation,
         child: Transform.scale(
-          scale: (isFocused) ? focusedScale : scale,
+          scale: (widget.isFocused && !isBeingManipulated) ? 1 : layer.scale,
           child: GestureDetector(
             onScaleStart: (details) {
-              baseScale = scale;
-              baseRotation = rotation;
+              setState(() {
+                isBeingManipulated = true;
+              });
+              baseScale = layer.scale;
+              baseRotation = layer.rotation;
             },
             onScaleUpdate: (details) {
-              if (!isFocused) {
-                setState(() {
-                  scale = baseScale * details.scale;
-                  rotation = baseRotation + details.rotation;
+              setState(() {
+                layer.scale = baseScale * details.scale;
+                layer.rotation = baseRotation + details.rotation;
 
-                  if (details.pointerCount > 1) return;
+                if (details.pointerCount > 1) return;
 
-                  final dx = details.focalPointDelta.dx;
-                  final dy = details.focalPointDelta.dy;
+                final dx = details.focalPointDelta.dx;
+                final dy = details.focalPointDelta.dy;
 
-                  final cos = math.cos(rotation);
-                  final sin = math.sin(rotation);
+                final cos = math.cos(layer.rotation);
+                final sin = math.sin(layer.rotation);
 
-                  x += (dx * cos - dy * sin) * scale;
-                  y += (dx * sin + dy * cos) * scale;
-                });
-              }
+                layer.position = Offset(
+                  layer.position.dx + (dx * cos - dy * sin) * layer.scale,
+                  layer.position.dy + (dx * sin + dy * cos) * layer.scale,
+                );
+              });
+            },
+            onScaleEnd: (details) {
+              setState(() {
+                isBeingManipulated = false;
+              });
             },
             child: IntrinsicWidth(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(borderRadius),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: widget.isFocused
+                      ? MediaQuery.of(context).size.width - 20
+                      : 75,
+                  maxWidth: MediaQuery.of(context).size.width - 20,
                 ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: isFocused
-                        ? MediaQuery.of(context).size.width - 20
-                        : 75,
-                    maxWidth: MediaQuery.of(context).size.width - 20,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: TextField(
-                      controller: controller,
-                      focusNode: focus,
-                      textAlign: textAlign,
-                      style: textStyle,
-                      cursorColor: textColor,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: TextField(
+                    autofocus: true,
+                    onTap: () {
+                      widget.onFocus();
+                    },
+                    controller: controller,
+                    focusNode: focus,
+                    onChanged: (value) {
+                      widget.layer.text = value;
+                    },
+                    textAlign: layer.textAlign,
+                    style: textStyle,
+                    cursorColor: layer.textColor,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    maxLines: null,
                   ),
                 ),
               ),
