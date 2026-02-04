@@ -217,6 +217,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                           if (selectedTool != Tool.text)
                             selectedTool = Tool.text;
                         }),
+                        onRemove: () {
+                          setState(() {
+                            layers.remove(layer);
+                            focusedLayer=null;
+                          });
+                        },
                       ),
                 ],
               ),
