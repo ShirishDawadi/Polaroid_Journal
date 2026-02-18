@@ -42,14 +42,12 @@ A creative Flutter app for designing aesthetic, scrapbook-style journal pages. P
 
 ---
 
-##  Screenshots
+## Screenshots
 
-> ![Tools](screenshots/Tools.jpg)
-> ![Custom Color Picker](screenshots/Custom_ColorPicker.jpg)
-> ![Stickers](screenshots/Stickers.jpg)
-> ![Gradient Background](screenshots/Gradient.jpg)
-> ![Paper Background](screenshots/PaperBg.jpg)
-> ![Finished Page](screenshots/Finished.jpg)
+| | | |
+|---|---|---|
+| ![Tools](screenshots/Tools.jpg) | ![Color Picker](screenshots/Custom_ColorPicker.jpg) | ![Stickers](screenshots/Stickers.jpg) |
+| ![Gradient](screenshots/Gradient.jpg) | ![Paper Background](screenshots/PaperBg.jpg) | ![Finished](screenshots/Finished.jpg) |
 
 ---
 
