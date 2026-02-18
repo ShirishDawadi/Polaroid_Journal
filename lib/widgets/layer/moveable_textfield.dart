@@ -72,29 +72,26 @@ class _MovableTextFieldState extends State<MovableTextField> {
       onFocus: widget.onFocus,
       resetTransformWhenFocused: true,
       child: IntrinsicWidth(
-        child: Container(
-          color: Colors.amber,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: widget.isFocused
-                  ? MediaQuery.of(context).size.width - 20
-                  : 75,
-              maxWidth: MediaQuery.of(context).size.width - 20,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                autofocus: true,
-                onTap: widget.onFocus,
-                controller: controller,
-                focusNode: focus,
-                onChanged: (value) => widget.layer.text = value,
-                textAlign: widget.layer.textAlign,
-                style: textStyle,
-                cursorColor: widget.layer.textColor,
-                decoration: const InputDecoration(border: InputBorder.none),
-                maxLines: null,
-              ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: widget.isFocused
+                ? MediaQuery.of(context).size.width - 20
+                : 75,
+            maxWidth: MediaQuery.of(context).size.width - 20,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: TextField(
+              autofocus: true,
+              onTap: widget.onFocus,
+              controller: controller,
+              focusNode: focus,
+              onChanged: (value) => widget.layer.text = value,
+              textAlign: widget.layer.textAlign,
+              style: textStyle,
+              cursorColor: widget.layer.textColor,
+              decoration: const InputDecoration(border: InputBorder.none),
+              maxLines: null,
             ),
           ),
         ),
