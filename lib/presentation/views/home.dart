@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/screens/jounrnal_entry.dart';
+import 'package:polaroid_journal/presentation/views/jounrnal_entry.dart';
 
 class HomeScreen extends StatelessWidget {
   @override

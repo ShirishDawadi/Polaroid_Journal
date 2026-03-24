@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/models/layer_model.dart';
+import 'package:polaroid_journal/data/models/layer_model.dart';
 
 class MovableLayer extends StatefulWidget {
   final LayerModel layer;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/utils/app_assets.dart';
-import 'package:polaroid_journal/widgets/decorated_icon_button.dart';
-import 'package:polaroid_journal/widgets/svg_widget.dart';
+import 'package:polaroid_journal/core/constants/app_assets.dart';
+import 'package:polaroid_journal/presentation/widgets/decorated_icon_button.dart';
+import 'package:polaroid_journal/presentation/widgets/svg_widget.dart';
 
 class PaperBgFab extends StatelessWidget {
   final Function(String) onSelect;

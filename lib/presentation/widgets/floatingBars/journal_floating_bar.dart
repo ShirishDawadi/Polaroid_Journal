@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/utils/app_assets.dart';
-import 'package:polaroid_journal/utils/tools_enum.dart';
-import 'package:polaroid_journal/widgets/svg_widget.dart';
+import 'package:polaroid_journal/core/constants/app_assets.dart';
+import 'package:polaroid_journal/core/utils/tools_enum.dart';
+import 'package:polaroid_journal/presentation/widgets/svg_widget.dart';
 
 class JournalFloatingBar extends StatelessWidget {
   final bool isOpen;

@@ -2,30 +2,34 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:polaroid_journal/models/layer_model.dart';
-import 'package:polaroid_journal/utils/tools_enum.dart';
-import 'package:polaroid_journal/widgets/floatingBars/color_floating_bar.dart';
-import 'package:polaroid_journal/widgets/color_picker/color_picker_overlay.dart';
-import 'package:polaroid_journal/widgets/floatingBars/fonts_fab.dart';
-import 'package:polaroid_journal/widgets/floatingBars/journal_floating_bar.dart';
-import 'package:polaroid_journal/widgets/floatingBars/paper_bg_fab.dart';
-import 'package:polaroid_journal/widgets/floatingBars/slider_fab.dart';
-import 'package:polaroid_journal/widgets/journal_background.dart';
-import 'package:polaroid_journal/widgets/layer/drawing_layer.dart';
-import 'package:polaroid_journal/widgets/layer/moveable_photo.dart';
-import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
-import 'package:polaroid_journal/widgets/floatingBars/journal_sub_fab.dart';
-import 'package:polaroid_journal/widgets/stickers_bottom_sheet.dart';
+import 'package:polaroid_journal/data/models/layer_model.dart';
+import 'package:polaroid_journal/core/utils/tools_enum.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/color_floating_bar.dart';
+import 'package:polaroid_journal/presentation/widgets/color_picker/color_picker_overlay.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/fonts_fab.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/journal_floating_bar.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/paper_bg_fab.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/slider_fab.dart';
+import 'package:polaroid_journal/presentation/widgets/journal_background.dart';
+import 'package:polaroid_journal/presentation/widgets/layer/drawing_layer.dart';
+import 'package:polaroid_journal/presentation/widgets/layer/moveable_photo.dart';
+import 'package:polaroid_journal/presentation/widgets/layer/moveable_textfield.dart';
+import 'package:polaroid_journal/presentation/widgets/floatingBars/journal_sub_fab.dart';
+import 'package:polaroid_journal/presentation/widgets/stickers_bottom_sheet.dart';
+import 'package:polaroid_journal/presentation/viewmodels/journal_viewmodel.dart';
 import 'package:whiteboard/whiteboard.dart';
 
-class JournalEntryScreen extends StatefulWidget {
+class JournalEntryScreen extends ConsumerStatefulWidget {
+  const JournalEntryScreen({super.key});
+
   @override
-  State<JournalEntryScreen> createState() => _JournalEntryScreenState();
+  ConsumerState<JournalEntryScreen> createState() => _JournalEntryScreenState();
 }
 
-class _JournalEntryScreenState extends State<JournalEntryScreen> {
-  List<LayerModel> layers = [];
+class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
+  // List<LayerModel> layers = [];
   LayerModel? focusedLayer;
 
   Color? primaryBackgroundColor = Colors.white;
@@ -69,7 +73,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
       setState(() {
         focusedLayer = layer;
-        layers.add(layer);
+        ref.read(journalProvider.notifier).addLayer(layer);
       });
     }
 
@@ -91,7 +95,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
     setState(() {
       focusedLayer = layer;
-      layers.add(layer);
+      ref.read(journalProvider.notifier).addLayer(layer);
     });
   }
 
@@ -131,7 +135,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
             setState(() {
               focusedLayer = layer;
-              layers.add(layer);
+              ref.read(journalProvider.notifier).addLayer(layer);
             });
           },
         );
@@ -146,6 +150,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final journalState = ref.watch(journalProvider);
+    final layers = journalState.layers;
+
     return Scaffold(
       appBar: AppBar(title: Text("New Journal Entry")),
       body: Stack(

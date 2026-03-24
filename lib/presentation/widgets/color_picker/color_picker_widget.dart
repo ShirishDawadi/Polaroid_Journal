@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'hue_ring.dart';
 import 'gradient_square.dart';
-import 'color_utils.dart';
+import '../../../core/utils/color_utils.dart';
 
 class ColorPickerWidget extends StatefulWidget {
   final Color initialColor;

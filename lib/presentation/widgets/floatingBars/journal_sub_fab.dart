@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/models/layer_model.dart';
-import 'package:polaroid_journal/utils/app_assets.dart';
-import 'package:polaroid_journal/utils/tools_enum.dart';
-import 'package:polaroid_journal/widgets/decorated_icon_button.dart';
+import 'package:polaroid_journal/data/models/layer_model.dart';
+import 'package:polaroid_journal/core/constants/app_assets.dart';
+import 'package:polaroid_journal/core/utils/tools_enum.dart';
+import 'package:polaroid_journal/presentation/widgets/decorated_icon_button.dart';
 // import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
-import 'package:polaroid_journal/widgets/svg_widget.dart';
+import 'package:polaroid_journal/presentation/widgets/svg_widget.dart';
 import 'package:whiteboard/whiteboard.dart';
 
 class JournalSubFAB extends StatefulWidget {

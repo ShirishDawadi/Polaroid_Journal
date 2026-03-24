@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/utils/tools_enum.dart';
+import 'package:polaroid_journal/core/utils/tools_enum.dart';
 
 class ColorFloatingBar extends StatelessWidget {
   final Function(Color?) onSelect;

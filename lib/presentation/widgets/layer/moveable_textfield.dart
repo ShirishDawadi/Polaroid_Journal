@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/models/layer_model.dart';
-import 'package:polaroid_journal/widgets/layer/moveable_layer.dart';
+import 'package:polaroid_journal/data/models/layer_model.dart';
+import 'package:polaroid_journal/presentation/widgets/layer/moveable_layer.dart';
 
 class MovableTextField extends StatefulWidget {
   final LayerModel layer;

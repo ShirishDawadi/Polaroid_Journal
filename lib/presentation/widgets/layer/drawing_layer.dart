@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:whiteboard/whiteboard.dart';
-import 'package:polaroid_journal/models/layer_model.dart';
+import 'package:polaroid_journal/data/models/layer_model.dart';
 
 class DrawingLayer extends StatelessWidget {
   final LayerModel layer;

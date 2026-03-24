@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/utils/app_assets.dart';
+import 'package:polaroid_journal/core/constants/app_assets.dart';
 
 class StickersBottomSheet extends StatelessWidget {
   final Function(String) onSelect;

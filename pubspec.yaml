@@ -15,6 +15,7 @@ dependencies:
   flutter_quill: ^11.5.0
   whiteboard: ^1.0.0
   flutter_svg: ^2.2.3
+  flutter_riverpod: ^3.3.1
 
 
 dev_dependencies:
