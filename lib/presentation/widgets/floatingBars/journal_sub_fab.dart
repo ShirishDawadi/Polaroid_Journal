@@ -3,7 +3,6 @@ import 'package:polaroid_journal/data/models/layer_model.dart';
 import 'package:polaroid_journal/core/constants/app_assets.dart';
 import 'package:polaroid_journal/core/utils/tools_enum.dart';
 import 'package:polaroid_journal/presentation/widgets/decorated_icon_button.dart';
-// import 'package:polaroid_journal/widgets/layer/moveable_textfield.dart';
 import 'package:polaroid_journal/presentation/widgets/svg_widget.dart';
 import 'package:whiteboard/whiteboard.dart';
 
@@ -12,7 +11,10 @@ class JournalSubFAB extends StatefulWidget {
   final SubTool? selectedSubTool;
   final Function(SubTool) onToolSelected;
 
-  // final GlobalKey<MovableTextFieldState>? selectedTextKey;
+  // Called when a text layer property changes (bold, italic, align, etc.)
+  // Parent receives the updated LayerModel and handles state
+  final Function(LayerModel)? onUpdateLayer;
+
   final LayerModel? layer;
 
   final WhiteBoardController? whiteBoardController;
@@ -27,7 +29,7 @@ class JournalSubFAB extends StatefulWidget {
     required this.selectedTool,
     required this.selectedSubTool,
     required this.onToolSelected,
-    // this.selectedTextKey,
+    this.onUpdateLayer,
     this.layer,
     this.whiteBoardController,
     this.currentBrushColor,
@@ -55,11 +57,11 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (layer.isBold) ? AppAssets.boldFilled : AppAssets.bold,
+              path: layer.isBold ? AppAssets.boldFilled : AppAssets.bold,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.bold);
-              setState(() => layer.isBold = !layer.isBold);
+              widget.onUpdateLayer?.call(layer.copyWith(isBold: !layer.isBold));
             },
           ),
           const SizedBox(width: 15),
@@ -67,13 +69,12 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (layer.isItalic)
-                  ? AppAssets.italicFilled
-                  : AppAssets.italic,
+              path: layer.isItalic ? AppAssets.italicFilled : AppAssets.italic,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.italic);
-              setState(() => layer.isItalic = !layer.isItalic);
+              widget.onUpdateLayer
+                  ?.call(layer.copyWith(isItalic: !layer.isItalic));
             },
           ),
           const SizedBox(width: 15),
@@ -81,13 +82,14 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (layer.isUnderline)
+              path: layer.isUnderline
                   ? AppAssets.underlineFilled
                   : AppAssets.underline,
             ),
             onPressed: () {
               widget.onToolSelected(SubTool.underline);
-              setState(() => layer.isUnderline = !layer.isUnderline);
+              widget.onUpdateLayer
+                  ?.call(layer.copyWith(isUnderline: !layer.isUnderline));
             },
           ),
           const SizedBox(width: 15),
@@ -101,23 +103,20 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           DecoratedIconButton(
             icon: AppSvg.icon(
               context: context,
-              path: (layer.textAlign == TextAlign.left)
+              path: layer.textAlign == TextAlign.left
                   ? AppAssets.leftAlign
-                  : (layer.textAlign == TextAlign.right)
-                  ? AppAssets.rightAlign
-                  : AppAssets.centerAlign,
+                  : layer.textAlign == TextAlign.right
+                      ? AppAssets.rightAlign
+                      : AppAssets.centerAlign,
             ),
             onPressed: () {
-              setState(() {
-                widget.onToolSelected(SubTool.align);
-                if (layer.textAlign == TextAlign.left) {
-                  layer.textAlign = TextAlign.center;
-                } else if (layer.textAlign == TextAlign.center) {
-                  layer.textAlign = TextAlign.right;
-                } else {
-                  layer.textAlign = TextAlign.left;
-                }
-              });
+              widget.onToolSelected(SubTool.align);
+              final nextAlign = layer.textAlign == TextAlign.left
+                  ? TextAlign.center
+                  : layer.textAlign == TextAlign.center
+                      ? TextAlign.right
+                      : TextAlign.left;
+              widget.onUpdateLayer?.call(layer.copyWith(textAlign: nextAlign));
             },
           ),
           const SizedBox(width: 15),
@@ -175,9 +174,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
 
           DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.thickness),
-            onPressed: () {
-              widget.onToolSelected(SubTool.thickness);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.thickness),
           ),
           const SizedBox(width: 15),
 
@@ -202,32 +199,27 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         children: [
           DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.paper),
-            onPressed: () {
-              widget.onToolSelected(SubTool.paper);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.paper),
           ),
           const SizedBox(width: 15),
 
           DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.slider),
-            onPressed: () {
-              widget.onToolSelected(SubTool.slider);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.slider),
           ),
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.isImageBackground!)
-                ? AppSvg.icon(context: context, path: AppAssets.wallpaperFilled)
+            icon: widget.isImageBackground!
+                ? AppSvg.icon(
+                    context: context, path: AppAssets.wallpaperFilled)
                 : AppSvg.icon(context: context, path: AppAssets.wallpaper),
-            onPressed: () {
-              widget.onToolSelected(SubTool.wallpaper);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.wallpaper),
           ),
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.primaryBackgroundColor != null)
+            icon: widget.primaryBackgroundColor != null
                 ? Icon(Icons.circle_rounded)
                 : Icon(Icons.add),
             color: widget.primaryBackgroundColor,
@@ -237,7 +229,7 @@ class _JournalSubFABState extends State<JournalSubFAB> {
           const SizedBox(width: 15),
 
           DecoratedIconButton(
-            icon: (widget.secondaryBackgroundColor != null)
+            icon: widget.secondaryBackgroundColor != null
                 ? Icon(Icons.circle_rounded)
                 : Icon(Icons.add),
             color: widget.secondaryBackgroundColor,
@@ -254,17 +246,13 @@ class _JournalSubFABState extends State<JournalSubFAB> {
         children: [
           DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.sticker),
-            onPressed: () {
-              widget.onToolSelected(SubTool.sticker);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.sticker),
           ),
           const SizedBox(width: 15),
 
           DecoratedIconButton(
             icon: AppSvg.icon(context: context, path: AppAssets.photo),
-            onPressed: () {
-              widget.onToolSelected(SubTool.photo);
-            },
+            onPressed: () => widget.onToolSelected(SubTool.photo),
           ),
         ],
       );

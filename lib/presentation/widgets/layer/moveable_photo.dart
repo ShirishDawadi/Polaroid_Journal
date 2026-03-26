@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
+import 'package:polaroid_journal/presentation/viewmodels/journal_viewmodel.dart';
 import 'package:polaroid_journal/presentation/widgets/layer/moveable_layer.dart';
 
-class MovablePhoto extends StatefulWidget {
+class MovablePhoto extends ConsumerWidget {
   final LayerModel layer;
   final bool isFocused;
   final VoidCallback onFocus;
@@ -15,26 +17,30 @@ class MovablePhoto extends StatefulWidget {
   });
 
   @override
-  State<MovablePhoto> createState() => _MovablePhotoState();
-}
-
-class _MovablePhotoState extends State<MovablePhoto> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MovableLayer(
-      layer: widget.layer,
-      isFocused: widget.isFocused,
-      onFocus: widget.onFocus,
+      layer: layer,
+      isFocused: isFocused,
+      onFocus: onFocus,
+      onTransformEnd: (position, scale, rotation) {
+        ref.read(journalProvider.notifier).updateLayer(
+              layer.copyWith(
+                position: position,
+                scale: scale,
+                rotation: rotation,
+              ),
+            );
+      },
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: widget.isFocused ? Colors.blue : Colors.transparent,
+            color: isFocused ? Colors.blue : Colors.transparent,
             width: 2,
           ),
         ),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 200),
-          child: Image(image: widget.layer.image!, fit: BoxFit.contain),
+          constraints: const BoxConstraints(maxWidth: 200),
+          child: Image(image: layer.image!, fit: BoxFit.contain),
         ),
       ),
     );

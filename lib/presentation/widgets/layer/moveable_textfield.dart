@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
+import 'package:polaroid_journal/presentation/viewmodels/journal_viewmodel.dart';
 import 'package:polaroid_journal/presentation/widgets/layer/moveable_layer.dart';
 
-class MovableTextField extends StatefulWidget {
+class MovableTextField extends ConsumerStatefulWidget {
   final LayerModel layer;
   final bool isFocused;
   final VoidCallback onFocus;
@@ -17,33 +19,55 @@ class MovableTextField extends StatefulWidget {
   });
 
   @override
-  State<MovableTextField> createState() => _MovableTextFieldState();
+  ConsumerState<MovableTextField> createState() => _MovableTextFieldState();
 }
 
-class _MovableTextFieldState extends State<MovableTextField> {
+class _MovableTextFieldState extends ConsumerState<MovableTextField> {
   final controller = TextEditingController();
   final focus = FocusNode();
+  late String _currentText;
 
   @override
   void initState() {
     super.initState();
-    controller.text = widget.layer.text!;
+    _currentText = widget.layer.text ?? '';
+    controller.text = _currentText;
     if (widget.isFocused) focus.requestFocus();
   }
 
   @override
   void didUpdateWidget(covariant MovableTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (!focus.hasFocus && widget.isFocused == oldWidget.isFocused) {
+      final modelText = widget.layer.text ?? '';
+      if (controller.text != modelText) {
+        controller.text = modelText;
+        _currentText = modelText;
+      }
+    }
+
     if (widget.isFocused && !oldWidget.isFocused) {
       focus.requestFocus();
     } else if (!widget.isFocused && oldWidget.isFocused) {
       focus.unfocus();
-      if (widget.layer.text?.trim().isEmpty ?? true) {
+      Future.microtask(_commitText);
+      if (_currentText.trim().isEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           widget.onRemove?.call();
         });
       }
     }
+  }
+
+  void _commitText() {
+    final latestLayer = ref
+        .read(journalProvider)
+        .layers
+        .firstWhere((l) => l.id == widget.layer.id, orElse: () => widget.layer);
+    ref
+        .read(journalProvider.notifier)
+        .updateLayer(latestLayer.copyWith(text: _currentText));
   }
 
   @override
@@ -71,6 +95,17 @@ class _MovableTextFieldState extends State<MovableTextField> {
       isFocused: widget.isFocused,
       onFocus: widget.onFocus,
       resetTransformWhenFocused: true,
+      onTransformEnd: (position, scale, rotation) {
+        ref
+            .read(journalProvider.notifier)
+            .updateLayer(
+              widget.layer.copyWith(
+                position: position,
+                scale: scale,
+                rotation: rotation,
+              ),
+            );
+      },
       child: IntrinsicWidth(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -86,7 +121,7 @@ class _MovableTextFieldState extends State<MovableTextField> {
               onTap: widget.onFocus,
               controller: controller,
               focusNode: focus,
-              onChanged: (value) => widget.layer.text = value,
+              onChanged: (value) => _currentText = value,
               textAlign: widget.layer.textAlign,
               style: textStyle,
               cursorColor: widget.layer.textColor,

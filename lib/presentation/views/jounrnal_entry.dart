@@ -104,10 +104,17 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
       if (selectedTool == Tool.draw) {
         currentBrushColor = color;
       }
-
       if (selectedTool == Tool.text) {
         currentTextColor = color;
-        focusedLayer!.textColor = color;
+        ref
+            .read(journalProvider.notifier)
+            .updateLayer(focusedLayer!.copyWith(textColor: color));
+        setState(() {
+          focusedLayer = ref
+              .read(journalProvider)
+              .layers
+              .firstWhere((l) => l.id == focusedLayer!.id);
+        });
       }
     }
     if (selectedTool == Tool.background) {
@@ -117,7 +124,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
         primaryBackgroundColor = color;
       }
     }
-    currentColor = color;
+    setState(() => currentColor = color);
   }
 
   void openBottomSheet() {
@@ -133,6 +140,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
               image: AssetImage(sticker),
             );
 
+            FocusScope.of(context).unfocus();
             setState(() {
               focusedLayer = layer;
               ref.read(journalProvider.notifier).addLayer(layer);
@@ -227,7 +235,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
                         onRemove: () {
                           setState(() {
                             layers.remove(layer);
-                            focusedLayer=null;
+                            focusedLayer = null;
                           });
                         },
                       ),
@@ -281,8 +289,15 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
               ignoring: isOpen,
               child: FontsFab(
                 onSelect: (font) {
+                  ref
+                      .read(journalProvider.notifier)
+                      .updateLayer(focusedLayer!.copyWith(fontFamily: font));
+                      //added the below part
                   setState(() {
-                    focusedLayer!.fontFamily = font;
+                    focusedLayer = ref
+                        .read(journalProvider)
+                        .layers
+                        .firstWhere((l) => l.id == focusedLayer!.id);
                   });
                 },
               ),
@@ -394,6 +409,17 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
                           primaryBackgroundColor: primaryBackgroundColor,
                           secondaryBackgroundColor: secondaryBackgroundColor,
                           isImageBackground: currentBackgroundImage != null,
+                          onUpdateLayer: (updatedLayer) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ref
+                                  .read(journalProvider.notifier)
+                                  .updateLayer(updatedLayer);
+                              setState(() {
+                                focusedLayer =
+                                    updatedLayer; // ← use updatedLayer directly, not from state
+                              });
+                            });
+                          },
                         ),
                       ),
                     ),

@@ -7,7 +7,10 @@ class MovableLayer extends StatefulWidget {
   final bool isFocused;
   final VoidCallback onFocus;
   final Widget child;
-  final bool resetTransformWhenFocused; 
+  final bool resetTransformWhenFocused;
+
+  final void Function(Offset position, double scale, double rotation)?
+      onTransformEnd;
 
   const MovableLayer({
     super.key,
@@ -16,6 +19,7 @@ class MovableLayer extends StatefulWidget {
     required this.onFocus,
     required this.child,
     this.resetTransformWhenFocused = false,
+    this.onTransformEnd,
   });
 
   @override
@@ -23,52 +27,74 @@ class MovableLayer extends StatefulWidget {
 }
 
 class _MovableLayerState extends State<MovableLayer> {
-  double baseScale = 1.0;
-  double baseRotation = 0.0;
-  bool isBeingManipulated = false;
+  late Offset _position;
+  late double _scale;
+  late double _rotation;
+
+  double _baseScale = 1.0;
+  double _baseRotation = 0.0;
+  bool _isBeingManipulated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _position = widget.layer.position;
+    _scale = widget.layer.scale;
+    _rotation = widget.layer.rotation;
+  }
+
+  @override
+  void didUpdateWidget(covariant MovableLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_isBeingManipulated) {
+      _position = widget.layer.position;
+      _scale = widget.layer.scale;
+      _rotation = widget.layer.rotation;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final layer = widget.layer;
-    final shouldReset = widget.resetTransformWhenFocused && 
-                        widget.isFocused && 
-                        !isBeingManipulated;
+    final shouldReset = widget.resetTransformWhenFocused &&
+        widget.isFocused &&
+        !_isBeingManipulated;
 
     return Positioned(
-      left: shouldReset ? 0 : layer.position.dx,
-      top: shouldReset ? 0 : layer.position.dy,
+      left: shouldReset ? 0 : _position.dx,
+      top: shouldReset ? 0 : _position.dy,
       child: Transform.rotate(
-        angle: shouldReset ? 0 : layer.rotation,
+        angle: shouldReset ? 0 : _rotation,
         child: Transform.scale(
-          scale: shouldReset ? 1 : layer.scale,
+          scale: shouldReset ? 1 : _scale,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: widget.onFocus,
             onScaleStart: (details) {
-              setState(() => isBeingManipulated = true);
-              baseScale = layer.scale;
-              baseRotation = layer.rotation;
+              setState(() => _isBeingManipulated = true);
+              _baseScale = _scale;
+              _baseRotation = _rotation;
             },
             onScaleUpdate: (details) {
               setState(() {
-                layer.scale = baseScale * details.scale;
-                layer.rotation = baseRotation + details.rotation;
+                _scale = _baseScale * details.scale;
+                _rotation = _baseRotation + details.rotation;
 
                 if (details.pointerCount > 1) return;
 
                 final dx = details.focalPointDelta.dx;
                 final dy = details.focalPointDelta.dy;
-                final cos = math.cos(layer.rotation);
-                final sin = math.sin(layer.rotation);
+                final cos = math.cos(_rotation);
+                final sin = math.sin(_rotation);
 
-                layer.position = Offset(
-                  layer.position.dx + (dx * cos - dy * sin) * layer.scale,
-                  layer.position.dy + (dx * sin + dy * cos) * layer.scale,
+                _position = Offset(
+                  _position.dx + (dx * cos - dy * sin) * _scale,
+                  _position.dy + (dx * sin + dy * cos) * _scale,
                 );
               });
             },
-            onScaleEnd: (details) {
-              setState(() => isBeingManipulated = false);
+            onScaleEnd: (_) {
+              setState(() => _isBeingManipulated = false);
+              widget.onTransformEnd?.call(_position, _scale, _rotation);
             },
             child: widget.child,
           ),
