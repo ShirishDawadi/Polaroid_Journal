@@ -49,10 +49,7 @@ class StickersBottomSheet extends StatelessWidget {
               children: [
                 ...stickers.map(
                   (sticker) => GestureDetector(
-                    onTap: () {
-                      onSelect(sticker);
-                      Navigator.pop(context);
-                    },
+                    onTap: () => onSelect(sticker),
                     child: Image.asset(sticker),
                   ),
                 ),

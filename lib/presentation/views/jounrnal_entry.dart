@@ -134,6 +134,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
       builder: (context) {
         return StickersBottomSheet(
           onSelect: (sticker) {
+            Navigator.pop(context);
             final layer = LayerModel(
               id: UniqueKey().toString(),
               type: LayerType.photo,
@@ -292,7 +293,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
                   ref
                       .read(journalProvider.notifier)
                       .updateLayer(focusedLayer!.copyWith(fontFamily: font));
-                      //added the below part
+                  //added the below part
                   setState(() {
                     focusedLayer = ref
                         .read(journalProvider)

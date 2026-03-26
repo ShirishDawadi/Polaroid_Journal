@@ -117,7 +117,7 @@ class _MovableTextFieldState extends ConsumerState<MovableTextField> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: TextField(
-              autofocus: true,
+              autofocus: false,
               onTap: widget.onFocus,
               controller: controller,
               focusNode: focus,
