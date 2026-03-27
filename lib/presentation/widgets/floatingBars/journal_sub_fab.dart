@@ -11,8 +11,6 @@ class JournalSubFAB extends StatefulWidget {
   final SubTool? selectedSubTool;
   final Function(SubTool) onToolSelected;
 
-  // Called when a text layer property changes (bold, italic, align, etc.)
-  // Parent receives the updated LayerModel and handles state
   final Function(LayerModel)? onUpdateLayer;
 
   final LayerModel? layer;

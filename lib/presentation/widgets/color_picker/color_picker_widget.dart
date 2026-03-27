@@ -8,7 +8,7 @@ class ColorPickerWidget extends StatefulWidget {
   final void Function(Color) onSelect;
   final VoidCallback onClose;
 
-  const ColorPickerWidget({
+  const ColorPickerWidget({super.key, 
     required this.initialColor,
     required this.onSelect,
     required this.onClose,

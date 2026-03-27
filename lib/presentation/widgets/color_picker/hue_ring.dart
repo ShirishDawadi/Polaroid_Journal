@@ -8,7 +8,7 @@ class HueRingWithHex extends StatelessWidget {
   final Function(double) onHueChanged;
   final Function(String) onHexChanged;
 
-  const HueRingWithHex({
+  const HueRingWithHex({super.key, 
     required this.hue,
     required this.hexController,
     required this.onHueChanged,

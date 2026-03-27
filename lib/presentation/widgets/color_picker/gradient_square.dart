@@ -6,7 +6,7 @@ class GradientSquare extends StatelessWidget {
   final double value;
   final Function(double, double) onColorChanged;
 
-  const GradientSquare({
+  const GradientSquare({super.key, 
     required this.hue,
     required this.saturation,
     required this.value,

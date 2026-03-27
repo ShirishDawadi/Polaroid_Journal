@@ -7,7 +7,7 @@ class SliderFab extends StatefulWidget {
   final double maxValue;
   final Function(double) onChanged;
 
-  SliderFab({
+  const SliderFab({
     super.key,
     this.isCustom = false,
     required this.strokeWidth,

@@ -1,62 +1,47 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:polaroid_journal/presentation/viewmodels/journal_state.dart';
 
 class JournalBackground extends StatelessWidget {
-  final Color? primaryBackgroundColor;
-  final Color? secondaryBackgroundColor;
-  final ImageProvider? image;
-  final double imageOpacity;
-  final double imageBlur;
+  final BackgroundConfig config;
 
-  const JournalBackground({
-    super.key,
-    required this.primaryBackgroundColor,
-    required this.secondaryBackgroundColor,
-    this.image,
-    this.imageOpacity = 1,
-    this.imageBlur = 0,
-  });
+  const JournalBackground({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // if(image==null)
         Container(
           decoration: BoxDecoration(
-            color:
-                (primaryBackgroundColor ?? secondaryBackgroundColor) ??
+            color: (config.primaryColor ?? config.secondaryColor) ??
                 Colors.transparent,
-            gradient:
-                (primaryBackgroundColor != null &&
-                    secondaryBackgroundColor != null)
+            gradient: (config.primaryColor != null &&
+                    config.secondaryColor != null)
                 ? LinearGradient(
-                    colors: [
-                      primaryBackgroundColor!,
-                      secondaryBackgroundColor!,
-                    ],
+                    colors: [config.primaryColor!, config.secondaryColor!],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   )
                 : null,
           ),
         ),
-
-        if (image != null)
+        if (config.image != null)
           Opacity(
-            opacity: imageOpacity,
+            opacity: config.opacity,
             child: Image(
-              image: image!,
+              image: config.image!,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
             ),
           ),
-
-        if (imageBlur > 0)
+        if (config.blur > 0)
           ClipRRect(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: imageBlur, sigmaY: imageBlur),
+              filter: ImageFilter.blur(
+                sigmaX: config.blur,
+                sigmaY: config.blur,
+              ),
               child: Container(color: Colors.transparent),
             ),
           ),
