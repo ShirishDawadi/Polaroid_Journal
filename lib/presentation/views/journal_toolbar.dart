@@ -145,16 +145,16 @@ class JournalToolbar extends ConsumerWidget {
                         selectedTool: selectedTool,
                         selectedSubTool: selectedSubTool,
                         onToolSelected: onSubToolSelected,
+                        onUpdateLayer: onLayerUpdated,
                         layer: focusedLayer,
                         whiteBoardController:
                             focusedLayer?.type == LayerType.drawing
                                 ? focusedLayer!.whiteBoardController
                                 : null,
                         currentBrushColor: currentBrushColor,
-                        primaryBackgroundColor: background.primaryColor,
-                        secondaryBackgroundColor: background.secondaryColor,
-                        isImageBackground: background.image != null,
-                        onUpdateLayer: onLayerUpdated,
+                        // primaryBackgroundColor: background.primaryColor,
+                        // secondaryBackgroundColor: background.secondaryColor,
+                        // isImageBackground: background.image != null,
                       ),
                     ),
                   ),

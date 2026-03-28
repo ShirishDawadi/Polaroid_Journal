@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:polaroid_journal/presentation/viewmodels/journal_state.dart';
+import 'package:polaroid_journal/data/models/journal_state.dart';
 
 class JournalBackground extends StatelessWidget {
   final BackgroundConfig config;

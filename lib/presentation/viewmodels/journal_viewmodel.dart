@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
-import 'journal_state.dart';
+import '../../data/models/journal_state.dart';
 
 class JournalNotifier extends Notifier<JournalState> {
   @override

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/layer_model.dart';
+import 'layer_model.dart';
 
 class BackgroundConfig {
   final Color? primaryColor;
