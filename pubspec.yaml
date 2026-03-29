@@ -16,6 +16,7 @@ dependencies:
   whiteboard: ^1.0.0
   flutter_svg: ^2.2.3
   flutter_riverpod: ^3.3.1
+  gal: ^2.3.2
 
 
 dev_dependencies:

@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/core/utils/tools_enum.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
@@ -18,6 +22,7 @@ class JournalEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
+  final GlobalKey _canvasKey = GlobalKey();
   LayerModel? focusedLayer;
 
   Color currentTextColor = Colors.black;
@@ -33,6 +38,8 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
   SubTool? selectedSubTool;
 
   bool _isPickingImage = false;
+
+  bool _isExporting = false;
 
   // ─── Layer actions ────────────────────────────────────────────────────────
 
@@ -98,7 +105,8 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
     }
 
     if (selectedSubTool == SubTool.wallpaper) {
-      ref.read(journalProvider.notifier)
+      ref
+          .read(journalProvider.notifier)
           .setBackgroundImage(FileImage(File(picked.path)));
     }
 
@@ -126,9 +134,9 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
       if (selectedTool == Tool.draw) currentBrushColor = color;
       if (selectedTool == Tool.text) {
         currentTextColor = color;
-        ref.read(journalProvider.notifier).updateLayer(
-              focusedLayer!.copyWith(textColor: color),
-            );
+        ref
+            .read(journalProvider.notifier)
+            .updateLayer(focusedLayer!.copyWith(textColor: color));
         setState(() {
           focusedLayer = ref
               .read(journalProvider)
@@ -150,9 +158,9 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
   // ─── Font ─────────────────────────────────────────────────────────────────
 
   void _changeFont(String font) {
-    ref.read(journalProvider.notifier).updateLayer(
-          focusedLayer!.copyWith(fontFamily: font),
-        );
+    ref
+        .read(journalProvider.notifier)
+        .updateLayer(focusedLayer!.copyWith(fontFamily: font));
     setState(() {
       focusedLayer = ref
           .read(journalProvider)
@@ -255,25 +263,83 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
     if (tool == Tool.text) _addTextField();
   }
 
+
+  void _changeStrokeWidth(double width){
+    setState(() => strokeWidth = width);
+  }
+  //  ─── Export ────────────────────────────────────────────────────────────────
+
+  Future<void> _exportCanvas() async {
+    if (_isExporting) return;
+
+    setState(() => _isExporting = true);
+
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Exporting...")));
+    }
+
+    try {
+      final boundary =
+          _canvasKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      await Gal.putImageBytes(pngBytes);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Saved to gallery")));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Export failed")));
+    }
+
+    if (mounted) setState(() => _isExporting = false);
+  }
+
   // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("New Journal Entry")),
-      body: JournalCanvas(
-        focusedLayer: focusedLayer,
-        selectedTool: selectedTool,
-        isOpen: isOpen,
-        isIgnoring: isIgnoring,
-        currentBrushColor: currentBrushColor,
-        strokeWidth: strokeWidth,
-        isErasing: isErasing,
-        onCanvasTapped: _onCanvasTapped,
-        onPhotoFocused: _onPhotoFocused,
-        onTextFocused: _onTextFocused,
-        onLayerRemoved: _onLayerRemoved,
-        onDismissOverlay: () => setState(() => isOpen = false),
+      appBar: AppBar(
+        title: const Text("New Journal Entry"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: _exportCanvas,
+          ),
+        ],
+      ),
+      body: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black, width: 2),
+        ),
+        child: RepaintBoundary(
+          key: _canvasKey,
+          child: JournalCanvas(
+            focusedLayer: focusedLayer,
+            selectedTool: selectedTool,
+            isOpen: isOpen,
+            isIgnoring: isIgnoring,
+            currentBrushColor: currentBrushColor,
+            strokeWidth: strokeWidth,
+            isErasing: isErasing,
+            onCanvasTapped: _onCanvasTapped,
+            onPhotoFocused: _onPhotoFocused,
+            onTextFocused: _onTextFocused,
+            onLayerRemoved: _onLayerRemoved,
+            onDismissOverlay: () => setState(() => isOpen = false),
+          ),
+        ),
       ),
       floatingActionButton: JournalToolbar(
         focusedLayer: focusedLayer,
@@ -288,6 +354,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
         onLayerUpdated: _onLayerUpdated,
         onColorChanged: _changeColor,
         onFontChanged: _changeFont,
+        onStrokeWidthChanged: _changeStrokeWidth,
         onToggle: () => setState(() {
           selectedSubTool = null;
           isOpen = !isOpen;

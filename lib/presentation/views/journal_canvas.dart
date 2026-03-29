@@ -48,43 +48,37 @@ class JournalCanvas extends ConsumerWidget {
       children: [
         GestureDetector(
           onTap: onCanvasTapped,
-          child: Container(
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.brown, width: 2),
-            ),
-            child: Stack(
-              children: [
-                JournalBackground(config: background),
-                for (final layer in layers)
-                  if (layer.type == LayerType.photo)
-                    MovablePhoto(
-                      key: ValueKey(layer.id),
-                      layer: layer,
-                      isFocused:
-                          layer == focusedLayer && selectedTool != Tool.draw,
-                      onFocus: () => onPhotoFocused(layer),
-                    )
-                  else if (layer.type == LayerType.drawing)
-                    DrawingLayer(
-                      key: ValueKey(layer.id),
-                      layer: layer,
-                      isActive: !isIgnoring,
-                      currentBrushColor: currentBrushColor,
-                      strokeWidth: strokeWidth,
-                      isErasing: isErasing,
-                    )
-                  else if (layer.type == LayerType.text)
-                    MovableTextField(
-                      key: ValueKey(layer.id),
-                      layer: layer,
-                      isFocused:
-                          layer == focusedLayer && selectedTool != Tool.draw,
-                      onFocus: () => onTextFocused(layer),
-                      onRemove: () => onLayerRemoved(layer),
-                    ),
-              ],
-            ),
+          child: Stack(
+            children: [
+              JournalBackground(config: background),
+              for (final layer in layers)
+                if (layer.type == LayerType.photo)
+                  MovablePhoto(
+                    key: ValueKey(layer.id),
+                    layer: layer,
+                    isFocused:
+                        layer == focusedLayer && selectedTool != Tool.draw,
+                    onFocus: () => onPhotoFocused(layer),
+                  )
+                else if (layer.type == LayerType.drawing)
+                  DrawingLayer(
+                    key: ValueKey(layer.id),
+                    layer: layer,
+                    isActive: !isIgnoring,
+                    currentBrushColor: currentBrushColor,
+                    strokeWidth: strokeWidth,
+                    isErasing: isErasing,
+                  )
+                else if (layer.type == LayerType.text)
+                  MovableTextField(
+                    key: ValueKey(layer.id),
+                    layer: layer,
+                    isFocused:
+                        layer == focusedLayer && selectedTool != Tool.draw,
+                    onFocus: () => onTextFocused(layer),
+                    onRemove: () => onLayerRemoved(layer),
+                  ),
+            ],
           ),
         ),
         if (isOpen)

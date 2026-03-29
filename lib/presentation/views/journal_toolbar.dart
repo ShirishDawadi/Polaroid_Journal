@@ -11,7 +11,7 @@ import 'package:polaroid_journal/presentation/widgets/floatingBars/journal_sub_f
 import 'package:polaroid_journal/presentation/widgets/floatingBars/paper_bg_fab.dart';
 import 'package:polaroid_journal/presentation/widgets/floatingBars/slider_fab.dart';
 
-class JournalToolbar extends ConsumerWidget {
+class JournalToolbar extends ConsumerStatefulWidget {
   final LayerModel? focusedLayer;
   final Tool? selectedTool;
   final SubTool? selectedSubTool;
@@ -24,6 +24,7 @@ class JournalToolbar extends ConsumerWidget {
   final void Function(LayerModel) onLayerUpdated;
   final void Function(Color?) onColorChanged;
   final void Function(String) onFontChanged;
+  final void Function(double) onStrokeWidthChanged;
   final VoidCallback onToggle;
   final Future<void> Function() pickImage;
 
@@ -41,64 +42,80 @@ class JournalToolbar extends ConsumerWidget {
     required this.onLayerUpdated,
     required this.onColorChanged,
     required this.onFontChanged,
+    required this.onStrokeWidthChanged,
     required this.onToggle,
     required this.pickImage,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JournalToolbar> createState() => _JournalToolbarState();
+}
+
+class _JournalToolbarState extends ConsumerState<JournalToolbar> {
+  late double localStrokeWidth;
+
+  @override
+  void initState() {
+    super.initState();
+    localStrokeWidth = widget.strokeWidth;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final background = ref.watch(journalProvider).background;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (selectedSubTool == SubTool.color ||
-            selectedSubTool == SubTool.secondaryBackgroundColor ||
-            selectedSubTool == SubTool.primaryBackgroundColor)
+        if (widget.selectedSubTool == SubTool.color ||
+            widget.selectedSubTool == SubTool.secondaryBackgroundColor ||
+            widget.selectedSubTool == SubTool.primaryBackgroundColor)
           IgnorePointer(
-            ignoring: isOpen,
+            ignoring: widget.isOpen,
             child: ColorFloatingBar(
-              selectedColor: currentColor,
-              tool: selectedTool,
-              onSelect: onColorChanged,
+              selectedColor: widget.currentColor,
+              tool: widget.selectedTool,
+              onSelect: widget.onColorChanged,
               onOpenColorPicker: () {
                 ColorPickerOverlay(
                   context: context,
-                  initialColor: currentColor!,
-                  onSelect: onColorChanged,
+                  initialColor: widget.currentColor!,
+                  onSelect: widget.onColorChanged,
                 ).show();
               },
             ),
           ),
 
-        if (selectedSubTool == SubTool.font)
+        if (widget.selectedSubTool == SubTool.font)
           IgnorePointer(
-            ignoring: isOpen,
-            child: FontsFab(onSelect: onFontChanged),
+            ignoring: widget.isOpen,
+            child: FontsFab(onSelect: widget.onFontChanged),
           ),
 
-        if (selectedSubTool == SubTool.thickness)
+        if (widget.selectedSubTool == SubTool.thickness)
           SliderFab(
             isCustom: true,
-            strokeWidth: strokeWidth,
+            strokeWidth: localStrokeWidth,
             minValue: 1,
             maxValue: 20,
-            onChanged: (value) =>
-                ref.read(journalProvider.notifier).setBlur(value),
+            onChanged: (value) {
+              setState(() => localStrokeWidth = value);
+              widget.onStrokeWidthChanged(value);
+            },
           ),
 
-        if (selectedSubTool == SubTool.wallpaper)
+        if (widget.selectedSubTool == SubTool.wallpaper)
           PaperBgFab(
             onSelect: (image) => ref
                 .read(journalProvider.notifier)
                 .setBackgroundImage(AssetImage(image)),
-            addBg: pickImage,
+            addBg: widget.pickImage,
             deleteBg: () =>
                 ref.read(journalProvider.notifier).setBackgroundImage(null),
           ),
 
-        if (selectedSubTool == SubTool.slider)
+        if (widget.selectedSubTool == SubTool.slider)
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -129,32 +146,30 @@ class JournalToolbar extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (selectedTool != null)
+            if (widget.selectedTool != null)
               IgnorePointer(
-                ignoring: isOpen,
+                ignoring: widget.isOpen,
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: ScrollConfiguration(
-                    behavior:
-                        const ScrollBehavior().copyWith(overscroll: false),
+                    behavior: const ScrollBehavior().copyWith(
+                      overscroll: false,
+                    ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       clipBehavior: Clip.none,
                       reverse: true,
                       child: JournalSubFAB(
-                        selectedTool: selectedTool,
-                        selectedSubTool: selectedSubTool,
-                        onToolSelected: onSubToolSelected,
-                        onUpdateLayer: onLayerUpdated,
-                        layer: focusedLayer,
+                        selectedTool: widget.selectedTool,
+                        selectedSubTool: widget.selectedSubTool,
+                        onToolSelected: widget.onSubToolSelected,
+                        onUpdateLayer: widget.onLayerUpdated,
+                        layer: widget.focusedLayer,
                         whiteBoardController:
-                            focusedLayer?.type == LayerType.drawing
-                                ? focusedLayer!.whiteBoardController
-                                : null,
-                        currentBrushColor: currentBrushColor,
-                        // primaryBackgroundColor: background.primaryColor,
-                        // secondaryBackgroundColor: background.secondaryColor,
-                        // isImageBackground: background.image != null,
+                            widget.focusedLayer?.type == LayerType.drawing
+                            ? widget.focusedLayer!.whiteBoardController
+                            : null,
+                        currentBrushColor: widget.currentBrushColor,
                       ),
                     ),
                   ),
@@ -164,10 +179,10 @@ class JournalToolbar extends ConsumerWidget {
             const SizedBox(width: 15),
 
             JournalFloatingBar(
-              isOpen: isOpen,
-              selectedTool: selectedTool,
-              onToolSelected: onToolSelected,
-              onToggle: onToggle,
+              isOpen: widget.isOpen,
+              selectedTool: widget.selectedTool,
+              onToolSelected: widget.onToolSelected,
+              onToggle: widget.onToggle,
             ),
           ],
         ),
