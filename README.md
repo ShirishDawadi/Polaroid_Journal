@@ -72,11 +72,11 @@ lib/
 │
 ├── data/
 │   └── models/
-│       └── layer_model.dart     # Immutable data model for each canvas layer
+│   │   ├── journal_state.dart        # Immutable app state
+│       └── layer_model.dart          # Immutable data model for each canvas layer
 │
 ├── presentation/
 │   ├── viewmodels/
-│   │   ├── journal_state.dart        # Immutable app state
 │   │   └── journal_viewmodel.dart    # JournalNotifier — all business logic lives here
 │   ├── views/
 │   │   ├── home.dart                 # Entry screen
@@ -144,7 +144,7 @@ flutter run
 ## 🗺️ Roadmap
 
 - [ ] Save journal entries locally (Isar / SQLite)
-- [ ] Export canvas as PNG / JPEG / PDF
+- [x] Export canvas as PNG 
 - [ ] Home screen gallery — view all saved journals
 - [ ] More sticker packs
 - [ ] Page templates
