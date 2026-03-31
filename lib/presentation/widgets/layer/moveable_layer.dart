@@ -1,14 +1,17 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
 
-class MovableLayer extends StatefulWidget {
+final isDraggingProvider = StateProvider<bool>((ref) => false);
+
+class MovableLayer extends ConsumerStatefulWidget {
   final LayerModel layer;
   final bool isFocused;
   final VoidCallback onFocus;
   final Widget child;
   final bool resetTransformWhenFocused;
-
   final void Function(Offset position, double scale, double rotation)?
       onTransformEnd;
 
@@ -23,10 +26,10 @@ class MovableLayer extends StatefulWidget {
   });
 
   @override
-  State<MovableLayer> createState() => _MovableLayerState();
+  ConsumerState<MovableLayer> createState() => _MovableLayerState();
 }
 
-class _MovableLayerState extends State<MovableLayer> {
+class _MovableLayerState extends ConsumerState<MovableLayer> {
   late Offset _position;
   late double _scale;
   late double _rotation;
@@ -71,6 +74,7 @@ class _MovableLayerState extends State<MovableLayer> {
             onTap: widget.onFocus,
             onScaleStart: (details) {
               setState(() => _isBeingManipulated = true);
+              ref.read(isDraggingProvider.notifier).state = true;
               _baseScale = _scale;
               _baseRotation = _rotation;
             },
@@ -94,6 +98,7 @@ class _MovableLayerState extends State<MovableLayer> {
             },
             onScaleEnd: (_) {
               setState(() => _isBeingManipulated = false);
+              ref.read(isDraggingProvider.notifier).state = false;
               widget.onTransformEnd?.call(_position, _scale, _rotation);
             },
             child: widget.child,

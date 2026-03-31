@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:polaroid_journal/core/utils/tools_enum.dart';
 import 'package:polaroid_journal/data/models/layer_model.dart';
 import 'package:polaroid_journal/presentation/viewmodels/journal_viewmodel.dart';
+import 'package:polaroid_journal/presentation/widgets/layer/moveable_layer.dart';
 import 'package:polaroid_journal/presentation/widgets/stickers_bottom_sheet.dart';
 import 'package:polaroid_journal/presentation/views/journal_canvas.dart';
 import 'package:polaroid_journal/presentation/views/journal_toolbar.dart';
@@ -62,6 +63,14 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
   void _onLayerRemoved(LayerModel layer) {
     ref.read(journalProvider.notifier).removeLayer(layer.id);
     setState(() => focusedLayer = null);
+  }
+
+  void _copyLayer(LayerModel layer) {
+    final copy = layer.copyWith(
+      id: UniqueKey().toString(),
+      position: Offset(layer.position.dx + 20, layer.position.dy + 20),
+    );
+    ref.read(journalProvider.notifier).addLayer(copy);
   }
 
   void _onLayerUpdated(LayerModel updatedLayer) {
@@ -263,8 +272,7 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
     if (tool == Tool.text) _addTextField();
   }
 
-
-  void _changeStrokeWidth(double width){
+  void _changeStrokeWidth(double width) {
     setState(() => strokeWidth = width);
   }
   //  ─── Export ────────────────────────────────────────────────────────────────
@@ -305,9 +313,42 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
   }
 
   // ─── Build ────────────────────────────────────────────────────────────────
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _actionBtn(
+          Icons.copy_rounded,
+          Colors.white,
+          () => _copyLayer(focusedLayer!),
+        ),
+        const SizedBox(width: 8),
+        _actionBtn(
+          Icons.delete_rounded,
+          Colors.red,
+          () => _onLayerRemoved(focusedLayer!),
+        ),
+      ],
+    );
+  }
+
+  Widget _actionBtn(IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(icon, color: color, size: 18),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDragging = ref.watch(isDraggingProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("New Journal Entry"),
@@ -318,28 +359,49 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
           ),
         ],
       ),
-      body: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black, width: 2),
-        ),
-        child: RepaintBoundary(
-          key: _canvasKey,
-          child: JournalCanvas(
-            focusedLayer: focusedLayer,
-            selectedTool: selectedTool,
-            isOpen: isOpen,
-            isIgnoring: isIgnoring,
-            currentBrushColor: currentBrushColor,
-            strokeWidth: strokeWidth,
-            isErasing: isErasing,
-            onCanvasTapped: _onCanvasTapped,
-            onPhotoFocused: _onPhotoFocused,
-            onTextFocused: _onTextFocused,
-            onLayerRemoved: _onLayerRemoved,
-            onDismissOverlay: () => setState(() => isOpen = false),
+      body: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: RepaintBoundary(
+              key: _canvasKey,
+              child: JournalCanvas(
+                focusedLayer: focusedLayer,
+                selectedTool: selectedTool,
+                isOpen: isOpen,
+                isIgnoring: isIgnoring,
+                currentBrushColor: currentBrushColor,
+                strokeWidth: strokeWidth,
+                isErasing: isErasing,
+                onCanvasTapped: _onCanvasTapped,
+                onPhotoFocused: _onPhotoFocused,
+                onTextFocused: _onTextFocused,
+                onLayerRemoved: _onLayerRemoved,
+                onDismissOverlay: () => setState(() => isOpen = false),
+              ),
+            ),
           ),
-        ),
+          if (focusedLayer != null && selectedTool != Tool.draw && !isDragging)
+            Positioned(
+              left: MediaQuery.of(context).size.width / 2.5,
+              top: () {
+                final latest = ref
+                    .read(journalProvider)
+                    .layers
+                    .firstWhere(
+                      (l) => l.id == focusedLayer!.id,
+                      orElse: () => focusedLayer!,
+                    );
+                return latest.position.dy < 30
+                    ? latest.position.dy + (200 * latest.scale)
+                    : latest.position.dy - (20 * latest.scale);
+              }(),
+              child: _buildActionButtons(),
+            ),
+        ],
       ),
       floatingActionButton: JournalToolbar(
         focusedLayer: focusedLayer,
